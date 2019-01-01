@@ -1,0 +1,60 @@
+{
+  "name": "fisa-clientes-functions",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "repository": "https://github.com/notapineapple/flexinomi-api.git",
+  "author": "Jorge Garduño <jorge@gendra.mx>",
+  "license": "No-License",
+  "private": true,
+  "engines": {
+    "node": "8"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.1.6",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.2.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.2.0",
+    "@babel/plugin-transform-runtime": "^7.2.0",
+    "@babel/preset-env": "^7.2.0",
+    "babel-plugin-module-resolver": "^3.1.1",
+    "npm-run-all": "^4.1.5",
+    "standard": "^12.0.1"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.1.5",
+    "@sendgrid/mail": "^6.3.1",
+    "axios": "^0.18.0",
+    "bcrypt": "^3.0.2",
+    "clean-dir": "^1.0.3",
+    "cors": "^2.8.5",
+    "corsify": "^2.1.0",
+    "cpy-cli": "^2.0.0",
+    "cross-env": "^5.2.0",
+    "firebase-admin": "^6.0.0",
+    "firebase-functions": "^2.0.5",
+    "glob": "^7.1.2",
+    "image-data-uri": "^2.0.0",
+    "mime-types": "^2.1.21",
+    "moment": "^2.22.2",
+    "neat-csv": "^4.0.0",
+    "objects-to-csv": "^1.2.1",
+    "path-match": "^1.2.4",
+    "ramda": "^0.26.1",
+    "sha1": "^1.1.1",
+    "url": "^0.11.0"
+  },
+  "scripts": {
+    "compile": "babel src --out-dir build --copy-files",
+    "clean": "cleandir build/",
+    "installdeps": "cd build && yarn install --ignore-engines",
+    "copy": "cpy package.json ./build",
+    "serve": "firebase serve --only functions",
+    "logs": "firebase functions:log",
+    "shell": "firebase functions:shell",
+    "deploy": "firebase deploy --only functions",
+    "dev": "npm-run-all clean compile installdeps serve",
+    "build": "npm-run-all clean copy compile installdeps",
+    "lint": "standard"
+  }
+}
