@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "fintech-movil-desarrollo"
+    "default": "fintech-movil-desarrollo",
+    "test": "pruebas-fisa"
   }
 }
