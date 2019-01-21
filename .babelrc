@@ -10,11 +10,9 @@
     ["module-resolver", {
       "root": ["./src"],
       "alias": {
-        "@utils": "./src/utils",
-        "@triggers": "./src/triggers.js",
-        "@firebase": "./src/firebase.js",
-        "@package": "./package.json",
-        "@accounts": "./src/accounts"
+        "@utils": "./src/utils/",
+        "@triggers": "./src/triggers/",
+        "@package": "./package.json"
       }
     }]
   ]
