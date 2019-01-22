@@ -26,21 +26,20 @@ var _ensureCors = _interopRequireDefault(require("./utils/ensureCors"));
  */
 var _default = (firebase, functions) => {
   return {
-    /**
-     * @description https function that validates documents already improved
-     * @type {HttpsFunction}
-     */
     CheckDocument: functions.https.onRequest((0, _forceSlash.default)((0, _ensureCors.default)((0, _triggers.checkDocument)(firebase)))),
-
-    /**
-     * @description Storage function that improves images for better Vision results
-     * @type {CloudFunction<ObjectMetadata>}
-     */
     ImproveImage: functions.storage.object().onFinalize((0, _triggers.improveImage)(firebase))
   };
 }; // export const RequestRegister = functions.https.onRequest(forceSlash(ensureCors(Triggers.requestRegister)))
 
+/**
+ * @description https function that validates documents already improved
+ * @type {HttpsFunction}
+ */
 
+/**
+ * @description Storage function that improves images for better Vision results
+ * @type {CloudFunction<ObjectMetadata>}
+ */
 
 
 exports.default = _default;
