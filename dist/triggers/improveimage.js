@@ -93,8 +93,8 @@ var _default = firebase => async object => {
      * @type {string}
      */
 
-    const tempConvertedPath = (0, _path.join)((0, _os.tmpdir)(), uploadPath);
-    await (0, _mkdirpPromise.default)((0, _path.basename)(tempPath));
+    const tempConvertedPath = (0, _path.join)((0, _os.tmpdir)(), uploadPath); // await mkdirp(basename(tempPath))
+
     /**
      * @description downloads image to convert on temp directory
      */
