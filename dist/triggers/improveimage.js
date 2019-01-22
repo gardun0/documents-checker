@@ -86,7 +86,7 @@ var _default = firebase => async object => {
 
     const uploadPath = (0, _path.normalize)((0, _path.format)({
       ext: `.${_mimeTypes.default.extension(IMAGE_TYPE)}`,
-      base: fileName,
+      base: `${fileName}.png`,
       dir: path
     }));
     /**
