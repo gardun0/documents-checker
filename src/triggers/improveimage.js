@@ -52,6 +52,7 @@ export default firebase => async object => {
 
     if (!(contentType || mime.lookup(name)).includes('image/')) return null
     if (!name.includes('waiting')) return null
+    if (!name.includes('_improved')) return null
 
     /**
      * @description name of the file handled
@@ -71,7 +72,7 @@ export default firebase => async object => {
      */
     const uploadPath = normalize(format({
       ext: `.${mime.extension(IMAGE_TYPE)}`,
-      base: `${fileName}.png`,
+      base: `${fileName}_improved.png`,
       dir: path
     }))
 

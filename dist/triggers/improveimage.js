@@ -67,6 +67,7 @@ var _default = firebase => async object => {
     const path = (0, _path.dirname)(name);
     if (!(contentType || _mimeTypes.default.lookup(name)).includes('image/')) return null;
     if (!name.includes('waiting')) return null;
+    if (!name.includes('_improved')) return null;
     /**
      * @description name of the file handled
      * @type {string}
@@ -86,7 +87,7 @@ var _default = firebase => async object => {
 
     const uploadPath = (0, _path.normalize)((0, _path.format)({
       ext: `.${_mimeTypes.default.extension(IMAGE_TYPE)}`,
-      base: `${fileName}.png`,
+      base: `${fileName}_improved.png`,
       dir: path
     }));
     /**
