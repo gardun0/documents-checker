@@ -53,66 +53,66 @@ var _default = firebase => async object => {
   } = object;
 
   try {
-    console.log(object); // /**
-    //  * @description instantiate the storage bucket
-    //  * @type {Storage.Bucket}
-    //  */
-    // const storage = firebase.storage().bucket(bucket)
-    //
-    // /**
-    //  * @description path from file
-    //  * @type {string}
-    //  */
-    // const path = dirname(name)
-    // console.log(path, name)
-    // if (!(contentType || mime.lookup(name)).includes('image/')) return null
-    //
-    // /**
-    //  * @description name of the file handled
-    //  * @type {string}
-    //  */
-    // const fileName = basename(name, extname(name))
-    //
-    // /**
-    //  * @description temp path for image
-    //  * @type {string}
-    //  */
-    // const tempPath = resolve(tmpdir(), name)
-    //
-    // /**
-    //  * @description upload path for image
-    //  * @type {string}
-    //  */
-    // const uploadPath = normalize(format({
-    //   ext: mime.extension(IMAGE_TYPE),
-    //   base: fileName,
-    //   dir: path
-    // }))
-    //
-    // /**
-    //  * @description temp path for converted image
-    //  * @type {string}
-    //  */
-    // const tempConvertedPath = join(tmpdir(), uploadPath)
-    //
-    // await mkdirp(basename(tempPath))
-    //
-    // /**
-    //  * @description downloads image to convert on temp directory
-    //  */
-    // await storage.file(name).download({ destination: tempPath })
-    //
-    // /**
-    //  * @description improves the image and create its into temp path
-    //  */
-    // await grayAndConvert(tempPath, tempConvertedPath)
-    //
-    // await storage.upload(tempConvertedPath, { destination: uploadPath })
-    //
-    // unlinkSync(tempConvertedPath)
-    // unlinkSync(tempPath)
-    //
-    // return null
+    /**
+     * @description instantiate the storage bucket
+     * @type {Storage.Bucket}
+     */
+    const storage = firebase.storage().bucket(bucket);
+    /**
+     * @description path from file
+     * @type {string}
+     */
+
+    const path = (0, _path.dirname)(name);
+    if (!(contentType || _mimeTypes.default.lookup(name)).includes('image/')) return null;
+    if (!name.includes('waiting')) return null;
+    /**
+     * @description name of the file handled
+     * @type {string}
+     */
+
+    const fileName = (0, _path.basename)(name, (0, _path.extname)(name));
+    /**
+     * @description temp path for image
+     * @type {string}
+     */
+
+    const tempPath = (0, _path.resolve)((0, _os.tmpdir)(), name);
+    /**
+     * @description upload path for image
+     * @type {string}
+     */
+
+    const uploadPath = (0, _path.normalize)((0, _path.format)({
+      ext: _mimeTypes.default.extension(IMAGE_TYPE),
+      base: fileName,
+      dir: path
+    }));
+    /**
+     * @description temp path for converted image
+     * @type {string}
+     */
+
+    const tempConvertedPath = (0, _path.join)((0, _os.tmpdir)(), uploadPath);
+    await (0, _mkdirpPromise.default)((0, _path.basename)(tempPath));
+    /**
+     * @description downloads image to convert on temp directory
+     */
+
+    await storage.file(name).download({
+      destination: tempPath
+    });
+    /**
+     * @description improves the image and create its into temp path
+     */
+
+    await grayAndConvert(tempPath, tempConvertedPath);
+    await storage.upload(tempConvertedPath, {
+      destination: uploadPath
+    });
+    (0, _fs.unlinkSync)(tempConvertedPath);
+    (0, _fs.unlinkSync)(tempPath);
+    return null;
   } catch (err) {
     console.error(err);
   }
