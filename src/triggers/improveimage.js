@@ -52,7 +52,7 @@ export default firebase => async object => {
 
     if (!(contentType || mime.lookup(name)).includes('image/')) return null
     if (!name.includes('waiting')) return null
-    if (!name.includes('_improved')) return null
+    if (name.includes('_improved')) return null
 
     /**
      * @description name of the file handled
