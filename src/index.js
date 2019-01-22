@@ -3,20 +3,10 @@
  */
 import { checkDocument, improveImage } from '@triggers'
 
-/**
- * @description HOC that fixes path errors for express/https functions
- */
-import forceSlash from '@utils/forceSlash'
-
-/**
- * @description HOC that ensure CORS for https functions
- */
-import ensureCors from '@utils/ensureCors'
-
-export default (firebase, functions) => {
+export default (firebase) => {
   return {
-    CheckDocument: functions.https.onRequest(forceSlash(ensureCors(checkDocument(firebase)))),
-    ImproveImage: functions.storage.object().onFinalize(improveImage(firebase))
+    CheckDocument: checkDocument(firebase),
+    ImproveImage: improveImage(firebase)
   }
 }
 
