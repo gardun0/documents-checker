@@ -2,39 +2,37 @@ import mime from 'mime-types'
 import { basename, extname, dirname, format, normalize, join } from 'path'
 import { tmpdir } from 'os'
 import { unlinkSync } from 'fs'
+import { gmToBuffer } from '@utils/helpers'
 import mkdirp from 'mkdirp-promise'
 
 const gm = require('gm').subClass({imageMagick: true})
 
 const IMAGE_TYPE = 'image/png'
 
+const saveInTemp = (gmInstance, destination) => new Promise((resolve, reject) => {
+  gm(gmInstance)
+    .write(destination, error => {
+      if (error) reject(error)
+      resolve()
+    })
+})
+
 /**
  * @function grayAndConvert
  * @returns {Function}
  */
-const grayAndConvert = (path, destination) => new Promise((resolve, reject) => {
-  gm(path)
+const grayAndConvert = async (path, destination) => {
+  const gmInstance = gm(path)
     .type('Grayscale') // Convert the image with Grayscale colors
     .density(300, 300) // Upgrade the resolution
-    .toBuffer('PNG', async (err, buffer) => {
-      /**
-       * We transform any image to PNG format
-       * JPEG like other formats have compression
-       * so we have to be able to get a better image
-       * no matter what
-       */
-      if (err) reject(err)
+    .bitdepth(8)
+    .blackThreshold(95)
+    .level(5, 0, 50, 100)
 
-      gm(buffer)
-        .bitdepth(8)
-        .blackThreshold(95)
-        .level(5, 0, 50, 100)
-        .write(destination, error => {
-          if (error) reject(err)
-          resolve()
-        })
-    })
-})
+  const buffer = await gmToBuffer(gmInstance)
+
+  return saveInTemp(buffer, destination)
+}
 
 export default firebase => async object => {
   const { name, bucket, contentType } = object

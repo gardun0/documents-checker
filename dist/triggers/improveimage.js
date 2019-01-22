@@ -15,6 +15,8 @@ var _os = require("os");
 
 var _fs = require("fs");
 
+var _helpers = require("../utils/helpers");
+
 var _mkdirpPromise = _interopRequireDefault(require("mkdirp-promise"));
 
 const gm = require('gm').subClass({
@@ -22,28 +24,26 @@ const gm = require('gm').subClass({
 });
 
 const IMAGE_TYPE = 'image/png';
+
+const saveInTemp = (gmInstance, destination) => new Promise((resolve, reject) => {
+  gm(gmInstance).write(destination, error => {
+    if (error) reject(error);
+    resolve();
+  });
+});
 /**
  * @function grayAndConvert
  * @returns {Function}
  */
 
-const grayAndConvert = (path, destination) => new Promise((resolve, reject) => {
-  gm(path).type('Grayscale') // Convert the image with Grayscale colors
+
+const grayAndConvert = async (path, destination) => {
+  const gmInstance = gm(path).type('Grayscale') // Convert the image with Grayscale colors
   .density(300, 300) // Upgrade the resolution
-  .toBuffer('PNG', async (err, buffer) => {
-    /**
-     * We transform any image to PNG format
-     * JPEG like other formats have compression
-     * so we have to be able to get a better image
-     * no matter what
-     */
-    if (err) reject(err);
-    gm(buffer).bitdepth(8).blackThreshold(95).level(5, 0, 50, 100).write(destination, error => {
-      if (error) reject(err);
-      resolve();
-    });
-  });
-});
+  .bitdepth(8).blackThreshold(95).level(5, 0, 50, 100);
+  const buffer = await (0, _helpers.gmToBuffer)(gmInstance);
+  return saveInTemp(buffer, destination);
+};
 
 var _default = firebase => async object => {
   const {
