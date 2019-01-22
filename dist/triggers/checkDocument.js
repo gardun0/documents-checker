@@ -7,8 +7,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _imageDataUri = _interopRequireDefault(require("image-data-uri"));
-
 var _moment = _interopRequireDefault(require("moment"));
 
 var _helpers = require("../utils/helpers");

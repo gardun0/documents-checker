@@ -29,8 +29,8 @@ const grayAndConvert = (path, destination) => new Promise((resolve, reject) => {
         .bitdepth(8)
         .blackThreshold(95)
         .level(5, 0, 50, 100)
-        .write(destination, err => {
-          if (err) reject(err)
+        .write(destination, error => {
+          if (error) reject(err)
           resolve()
         })
     })
@@ -38,7 +38,7 @@ const grayAndConvert = (path, destination) => new Promise((resolve, reject) => {
 
 export default firebase => async object => {
   const { name, bucket, contentType } = object
-
+  console.log(object)
   try {
     /**
      * @description instantiate the storage bucket
@@ -65,7 +65,7 @@ export default firebase => async object => {
      * @description temp path for image
      * @type {string}
      */
-    const tempPath = resolve(tmpdir(), name)
+    const tempPath = join(tmpdir(), name)
 
     /**
      * @description upload path for image
@@ -82,7 +82,7 @@ export default firebase => async object => {
      * @type {string}
      */
     const tempConvertedPath = join(tmpdir(), uploadPath)
-
+    console.log(tempConvertedPath, uploadPath, tempPath)
     await mkdirp(dirname(tempPath))
 
     /**
@@ -94,7 +94,7 @@ export default firebase => async object => {
      * @description improves the image and create its into temp path
      */
     await grayAndConvert(tempPath, tempConvertedPath)
-    console.log(tempConvertedPath, uploadPath)
+
     await storage.upload(tempConvertedPath, { destination: uploadPath })
 
     unlinkSync(tempConvertedPath)
