@@ -94,7 +94,7 @@ export default firebase => async object => {
      * @description improves the image and create its into temp path
      */
     await grayAndConvert(tempPath, tempConvertedPath)
-
+    console.log(tempConvertedPath, uploadPath)
     await storage.upload(tempConvertedPath, { destination: uploadPath })
 
     unlinkSync(tempConvertedPath)
