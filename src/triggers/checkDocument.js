@@ -1,4 +1,3 @@
-import ImageURI from 'image-data-uri'
 import moment from 'moment'
 import { gmToBuffer, errorResponse, successResponse, optionalProperty } from '@utils/helpers'
 import { toUpper, compose, prop, map, join, reduce, split, keys, curry, divide, __ } from 'ramda'
