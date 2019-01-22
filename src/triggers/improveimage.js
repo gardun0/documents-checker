@@ -1,10 +1,10 @@
 import mime from 'mime-types'
-import { basename, extname, dirname, resolve, format, normalize, join } from 'path'
+import { basename, extname, dirname, format, normalize, join } from 'path'
 import { tmpdir } from 'os'
 import { unlinkSync } from 'fs'
 import mkdirp from 'mkdirp-promise'
 
-const gm = require('gm').subClass({ imageMagick: true })
+const gm = require('gm').subClass({imageMagick: true})
 
 const IMAGE_TYPE = 'image/png'
 
