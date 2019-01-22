@@ -38,8 +38,8 @@ const grayAndConvert = (path, destination) => new Promise((resolve, reject) => {
      * no matter what
      */
     if (err) reject(err);
-    gm(buffer).bitdepth(8).blackThreshold(95).level(5, 0, 50, 100).write(destination, err => {
-      if (err) reject(err);
+    gm(buffer).bitdepth(8).blackThreshold(95).level(5, 0, 50, 100).write(destination, error => {
+      if (error) reject(err);
       resolve();
     });
   });
@@ -51,6 +51,7 @@ var _default = firebase => async object => {
     bucket,
     contentType
   } = object;
+  console.log(object);
 
   try {
     /**
@@ -77,7 +78,7 @@ var _default = firebase => async object => {
      * @type {string}
      */
 
-    const tempPath = (0, _path.resolve)((0, _os.tmpdir)(), name);
+    const tempPath = (0, _path.join)((0, _os.tmpdir)(), name);
     /**
      * @description upload path for image
      * @type {string}
@@ -94,6 +95,7 @@ var _default = firebase => async object => {
      */
 
     const tempConvertedPath = (0, _path.join)((0, _os.tmpdir)(), uploadPath);
+    console.log(tempConvertedPath, uploadPath, tempPath);
     await (0, _mkdirpPromise.default)((0, _path.dirname)(tempPath));
     /**
      * @description downloads image to convert on temp directory
