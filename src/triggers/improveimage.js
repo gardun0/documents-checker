@@ -83,7 +83,7 @@ export default firebase => async object => {
      */
     const tempConvertedPath = join(tmpdir(), uploadPath)
 
-    // await mkdirp(basename(tempPath))
+    await mkdirp(dirname(tempPath))
 
     /**
      * @description downloads image to convert on temp directory
