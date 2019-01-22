@@ -21,18 +21,18 @@ const saveInTemp = (gmInstance, destination) => new Promise((resolve, reject) =>
  * @function grayAndConvert
  * @returns {Function}
  */
-const grayAndConvert = async (path, destination) => {
-  const gmInstance = gm(path)
+const grayAndConvert = (path) => new Promise((resolve, reject) => {
+  gm(path)
     .type('Grayscale') // Convert the image with Grayscale colors
     .density(300, 300) // Upgrade the resolution
     .bitdepth(8)
     .blackThreshold(95)
     .level(5, 0, 50, 100)
-
-  const buffer = await gmToBuffer(gmInstance)
-
-  return saveInTemp(buffer, destination)
-}
+    .toBuffer('PNG', (err, buffer) => {
+      if (err) reject(err)
+      resolve(buffer)
+    })
+})
 
 export default firebase => async object => {
   const { name, bucket, contentType } = object
@@ -71,7 +71,6 @@ export default firebase => async object => {
      * @type {string}
      */
     const uploadPath = normalize(format({
-      ext: `.${mime.extension(IMAGE_TYPE)}`,
       base: `${fileName}_improved.png`,
       dir: path
     }))
@@ -81,7 +80,7 @@ export default firebase => async object => {
      * @type {string}
      */
     const tempConvertedPath = join(tmpdir(), uploadPath)
-    console.log(tempConvertedPath, uploadPath, tempPath)
+
     await mkdirp(dirname(tempPath))
 
     /**
@@ -92,9 +91,13 @@ export default firebase => async object => {
     /**
      * @description improves the image and create its into temp path
      */
-    await grayAndConvert(tempPath, tempConvertedPath)
+    const imageImproved = await grayAndConvert(tempPath)
 
-    await storage.upload(tempConvertedPath, { destination: uploadPath })
+    console.log(imageImproved)
+
+    const fileToUpload = storage.file(uploadPath)
+
+    await fileToUpload.save(imageImproved)
 
     unlinkSync(tempConvertedPath)
     unlinkSync(tempPath)

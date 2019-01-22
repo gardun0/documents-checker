@@ -37,13 +37,14 @@ const saveInTemp = (gmInstance, destination) => new Promise((resolve, reject) =>
  */
 
 
-const grayAndConvert = async (path, destination) => {
-  const gmInstance = gm(path).type('Grayscale') // Convert the image with Grayscale colors
+const grayAndConvert = path => new Promise((resolve, reject) => {
+  gm(path).type('Grayscale') // Convert the image with Grayscale colors
   .density(300, 300) // Upgrade the resolution
-  .bitdepth(8).blackThreshold(95).level(5, 0, 50, 100);
-  const buffer = await (0, _helpers.gmToBuffer)(gmInstance);
-  return saveInTemp(buffer, destination);
-};
+  .bitdepth(8).blackThreshold(95).level(5, 0, 50, 100).toBuffer('PNG', (err, buffer) => {
+    if (err) reject(err);
+    resolve(buffer);
+  });
+});
 
 var _default = firebase => async object => {
   const {
@@ -67,7 +68,7 @@ var _default = firebase => async object => {
     const path = (0, _path.dirname)(name);
     if (!(contentType || _mimeTypes.default.lookup(name)).includes('image/')) return null;
     if (!name.includes('waiting')) return null;
-    if (!name.includes('_improved')) return null;
+    if (name.includes('_improved')) return null;
     /**
      * @description name of the file handled
      * @type {string}
@@ -86,7 +87,6 @@ var _default = firebase => async object => {
      */
 
     const uploadPath = (0, _path.normalize)((0, _path.format)({
-      ext: `.${_mimeTypes.default.extension(IMAGE_TYPE)}`,
       base: `${fileName}_improved.png`,
       dir: path
     }));
@@ -96,7 +96,6 @@ var _default = firebase => async object => {
      */
 
     const tempConvertedPath = (0, _path.join)((0, _os.tmpdir)(), uploadPath);
-    console.log(tempConvertedPath, uploadPath, tempPath);
     await (0, _mkdirpPromise.default)((0, _path.dirname)(tempPath));
     /**
      * @description downloads image to convert on temp directory
@@ -109,10 +108,10 @@ var _default = firebase => async object => {
      * @description improves the image and create its into temp path
      */
 
-    await grayAndConvert(tempPath, tempConvertedPath);
-    await storage.upload(tempConvertedPath, {
-      destination: uploadPath
-    });
+    const imageImproved = await grayAndConvert(tempPath);
+    console.log(imageImproved);
+    const fileToUpload = storage.file(uploadPath);
+    await fileToUpload.save(imageImproved);
     (0, _fs.unlinkSync)(tempConvertedPath);
     (0, _fs.unlinkSync)(tempPath);
     return null;
