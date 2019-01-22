@@ -10,10 +10,9 @@ const IMAGE_TYPE = 'image/png'
 
 /**
  * @function grayAndConvert
- * @param firebase{string}
  * @returns {Function}
  */
-const grayAndConvert = (firebase) => (path, destination) => new Promise((resolve, reject) => {
+const grayAndConvert = (path, destination) => new Promise((resolve, reject) => {
   gm(path)
     .type('Grayscale') // Convert the image with Grayscale colors
     .density(300, 300) // Upgrade the resolution
@@ -37,7 +36,7 @@ const grayAndConvert = (firebase) => (path, destination) => new Promise((resolve
     })
 })
 
-export default async object => {
+export default firebase => async object => {
   const { name, bucket, contentType } = object
 
   try {
