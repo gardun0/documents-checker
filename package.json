@@ -50,6 +50,8 @@
     "compile": "babel src --out-dir dist --copy-files",
     "clean": "cleandir dist/",
     "build": "npm-run-all clean compile",
+    "preinstall": "bash ../scripts/setup.ssh",
+    "postinstall": "bash ../scripts/cleanup.ssh",
     "lint": "standard"
   }
 }
