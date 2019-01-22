@@ -24,11 +24,10 @@ const gm = require('gm').subClass({
 const IMAGE_TYPE = 'image/png';
 /**
  * @function grayAndConvert
- * @param firebase{string}
  * @returns {Function}
  */
 
-const grayAndConvert = firebase => (path, destination) => new Promise((resolve, reject) => {
+const grayAndConvert = (path, destination) => new Promise((resolve, reject) => {
   gm(path).type('Grayscale') // Convert the image with Grayscale colors
   .density(300, 300) // Upgrade the resolution
   .toBuffer('PNG', async (err, buffer) => {
@@ -46,7 +45,7 @@ const grayAndConvert = firebase => (path, destination) => new Promise((resolve, 
   });
 });
 
-var _default = async object => {
+var _default = firebase => async object => {
   const {
     name,
     bucket,
