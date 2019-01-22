@@ -72,7 +72,7 @@ export default firebase => async object => {
      * @type {string}
      */
     const uploadPath = normalize(format({
-      ext: mime.extension(IMAGE_TYPE),
+      ext: `.${mime.extension(IMAGE_TYPE)}`,
       base: fileName,
       dir: path
     }))
