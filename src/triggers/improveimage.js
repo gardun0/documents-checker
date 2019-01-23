@@ -86,7 +86,7 @@ export default firebase => async object => {
 
     await storage.file(name).download({ destination: tempPath })
 
-    await spawn('convert', [tempPath, '-type Grayscale', '-density 300', '-depth 8', '-black-threshold 95%', '-level 5,50,0', tempConvertedPath])
+    await spawn('convert', [tempPath, '-type', 'Grayscale', '-density', '300', '-depth', '8', '-black-threshold', '95%', tempConvertedPath], { capture: ['stdout', 'stderr'] })
 
     await storage.upload(tempConvertedPath, { destination: uploadPath })
 
