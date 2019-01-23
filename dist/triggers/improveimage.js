@@ -102,7 +102,7 @@ var _default = firebase => async object => {
     await storage.file(name).download({
       destination: tempPath
     });
-    await (0, _childProcessPromise.spawn)('convert', [tempPath, '-type', 'Grayscale', '-density', '300', '-depth', '8', '-black-threshold', '95%', tempConvertedPath], {
+    await (0, _childProcessPromise.spawn)('convert', [tempPath, '-type', 'Grayscale', '-density', '300', '-depth', '8', '-black-threshold', '87%', '-level', '50x100%', tempConvertedPath], {
       capture: ['stdout', 'stderr']
     });
     await storage.upload(tempConvertedPath, {
