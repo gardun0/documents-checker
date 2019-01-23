@@ -2,40 +2,38 @@ import mime from 'mime-types'
 import { basename, extname, dirname, format, normalize, join } from 'path'
 import { tmpdir } from 'os'
 import { unlinkSync } from 'fs'
-import { gmToBuffer } from '@utils/helpers'
+import { spawn } from 'child-process-promise'
 import mkdirp from 'mkdirp-promise'
 
-const gm = require('gm')
-
-const IMAGE_TYPE = 'image/png'
-
-const saveInTemp = (gmInstance, destination) => new Promise((resolve, reject) => {
-  gm(gmInstance)
-    .write(destination, error => {
-      if (error) reject(error)
-      resolve()
-    })
-})
-
-/**
- * @function grayAndConvert
- * @returns {Function}
- */
-const grayAndConvert = buff => new Promise((resolve, reject) => {
-  gm(buff)
-    .type('Grayscale') // Convert the image with Grayscale colors
-    .density(300, 300) // Upgrade the resolution
-    .toBuffer('PNG', async (err, buffer) => {
-      if (err) reject(err)
-
-      const gmInstance = gm(buffer)
-        .bitdepth(8)
-        .blackThreshold(95)
-        .level(5, 0, 50, 100)
-
-      resolve(await gmToBuffer(gmInstance))
-    })
-})
+// const IMAGE_TYPE = 'image/png'
+//
+// const saveInTemp = (gmInstance, destination) => new Promise((resolve, reject) => {
+//   gm(gmInstance)
+//     .write(destination, error => {
+//       if (error) reject(error)
+//       resolve()
+//     })
+// })
+//
+// /**
+//  * @function grayAndConvert
+//  * @returns {Function}
+//  */
+// const grayAndConvert = buff => new Promise((resolve, reject) => {
+//   gm(buff)
+//     .type('Grayscale') // Convert the image with Grayscale colors
+//     .density(300, 300) // Upgrade the resolution
+//     .toBuffer('PNG', async (err, buffer) => {
+//       if (err) reject(err)
+//
+//       const gmInstance = gm(buffer)
+//         .bitdepth(8)
+//         .blackThreshold(95)
+//         .level(5, 0, 50, 100)
+//
+//       resolve(await gmToBuffer(gmInstance))
+//     })
+// })
 
 export default firebase => async object => {
   const { name, bucket, contentType } = object
@@ -86,22 +84,13 @@ export default firebase => async object => {
 
     await mkdirp(dirname(tempPath))
 
-    /**
-     * @description downloads image to convert on temp directory
-     */
-    const fileToImprove = await storage.file(name).download()
-    console.log(fileToImprove)
-    /**
-     * @description improves the image and create its into temp path
-     */
-    const imageImproved = await grayAndConvert(fileToImprove)
-    console.log(imageImproved)
-    const fileToUpload = storage.file(uploadPath)
+    await storage.file(name).download({ destination: tempPath })
 
-    await fileToUpload.save(imageImproved, {
-      contentType: 'image/png'
-    })
+    await spawn('convert', [tempPath, '-type Grayscale', '-density 300', '-depth 8', '-black-threshold 95%', '-level 5,50,0', tempConvertedPath])
 
+    await storage.upload(tempConvertedPath, { destination: uploadPath })
+
+    unlinkSync(tempConvertedPath)
     unlinkSync(tempPath)
 
     return null

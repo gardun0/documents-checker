@@ -15,36 +15,39 @@ var _os = require("os");
 
 var _fs = require("fs");
 
-var _helpers = require("../utils/helpers");
+var _childProcessPromise = require("child-process-promise");
 
 var _mkdirpPromise = _interopRequireDefault(require("mkdirp-promise"));
 
-const gm = require('gm');
-
-const IMAGE_TYPE = 'image/png';
-
-const saveInTemp = (gmInstance, destination) => new Promise((resolve, reject) => {
-  gm(gmInstance).write(destination, error => {
-    if (error) reject(error);
-    resolve();
-  });
-});
-/**
- * @function grayAndConvert
- * @returns {Function}
- */
-
-
-const grayAndConvert = buff => new Promise((resolve, reject) => {
-  gm(buff).type('Grayscale') // Convert the image with Grayscale colors
-  .density(300, 300) // Upgrade the resolution
-  .toBuffer('PNG', async (err, buffer) => {
-    if (err) reject(err);
-    const gmInstance = gm(buffer).bitdepth(8).blackThreshold(95).level(5, 0, 50, 100);
-    resolve((await (0, _helpers.gmToBuffer)(gmInstance)));
-  });
-});
-
+// const IMAGE_TYPE = 'image/png'
+//
+// const saveInTemp = (gmInstance, destination) => new Promise((resolve, reject) => {
+//   gm(gmInstance)
+//     .write(destination, error => {
+//       if (error) reject(error)
+//       resolve()
+//     })
+// })
+//
+// /**
+//  * @function grayAndConvert
+//  * @returns {Function}
+//  */
+// const grayAndConvert = buff => new Promise((resolve, reject) => {
+//   gm(buff)
+//     .type('Grayscale') // Convert the image with Grayscale colors
+//     .density(300, 300) // Upgrade the resolution
+//     .toBuffer('PNG', async (err, buffer) => {
+//       if (err) reject(err)
+//
+//       const gmInstance = gm(buffer)
+//         .bitdepth(8)
+//         .blackThreshold(95)
+//         .level(5, 0, 50, 100)
+//
+//       resolve(await gmToBuffer(gmInstance))
+//     })
+// })
 var _default = firebase => async object => {
   const {
     name,
@@ -96,22 +99,14 @@ var _default = firebase => async object => {
 
     const tempConvertedPath = (0, _path.join)((0, _os.tmpdir)(), uploadPath);
     await (0, _mkdirpPromise.default)((0, _path.dirname)(tempPath));
-    /**
-     * @description downloads image to convert on temp directory
-     */
-
-    const fileToImprove = await storage.file(name).download();
-    console.log(fileToImprove);
-    /**
-     * @description improves the image and create its into temp path
-     */
-
-    const imageImproved = await grayAndConvert(fileToImprove);
-    console.log(imageImproved);
-    const fileToUpload = storage.file(uploadPath);
-    await fileToUpload.save(imageImproved, {
-      contentType: 'image/png'
+    await storage.file(name).download({
+      destination: tempPath
     });
+    await (0, _childProcessPromise.spawn)('convert', [tempPath, '-type Grayscale', '-density 300', '-depth 8', '-black-threshold 95%', '-level 5,50,0', tempConvertedPath]);
+    await storage.upload(tempConvertedPath, {
+      destination: uploadPath
+    });
+    (0, _fs.unlinkSync)(tempConvertedPath);
     (0, _fs.unlinkSync)(tempPath);
     return null;
   } catch (err) {
