@@ -21,16 +21,21 @@ const saveInTemp = (gmInstance, destination) => new Promise((resolve, reject) =>
  * @function grayAndConvert
  * @returns {Function}
  */
-const grayAndConvert = (path) => new Promise((resolve, reject) => {
-  gm(path)
+const grayAndConvert = buff => new Promise((resolve, reject) => {
+  gm(buff)
     .type('Grayscale') // Convert the image with Grayscale colors
     .density(300, 300) // Upgrade the resolution
-    .bitdepth(8)
-    .blackThreshold(95)
-    .level(5, 0, 50, 100)
     .toBuffer('PNG', (err, buffer) => {
       if (err) reject(err)
-      resolve(buffer)
+
+      gm(buffer)
+        .bitdepth(8)
+        .blackThreshold(95)
+        .level(5, 0, 50, 100)
+        .toBuffer('PNG', (error, bufferImproved) => {
+          if (error) reject(error)
+          resolve(bufferImproved)
+        })
     })
 })
 
@@ -86,20 +91,19 @@ export default firebase => async object => {
     /**
      * @description downloads image to convert on temp directory
      */
-    await storage.file(name).download({ destination: tempPath })
-
+    const fileToImprove = await storage.file(name).download()
+    console.log(fileToImprove)
     /**
      * @description improves the image and create its into temp path
      */
-    const imageImproved = await grayAndConvert(tempPath)
-
+    const imageImproved = await grayAndConvert(fileToImprove)
     console.log(imageImproved)
-
     const fileToUpload = storage.file(uploadPath)
 
-    await fileToUpload.save(imageImproved)
+    await fileToUpload.save(imageImproved, {
+      contentType: 'image/png'
+    })
 
-    unlinkSync(tempConvertedPath)
     unlinkSync(tempPath)
 
     return null
