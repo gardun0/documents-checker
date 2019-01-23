@@ -19,9 +19,7 @@ var _helpers = require("../utils/helpers");
 
 var _mkdirpPromise = _interopRequireDefault(require("mkdirp-promise"));
 
-const gm = require('gm').subClass({
-  imageMagick: true
-});
+const gm = require('gm');
 
 const IMAGE_TYPE = 'image/png';
 
@@ -40,12 +38,10 @@ const saveInTemp = (gmInstance, destination) => new Promise((resolve, reject) =>
 const grayAndConvert = buff => new Promise((resolve, reject) => {
   gm(buff).type('Grayscale') // Convert the image with Grayscale colors
   .density(300, 300) // Upgrade the resolution
-  .toBuffer('PNG', (err, buffer) => {
+  .toBuffer('PNG', async (err, buffer) => {
     if (err) reject(err);
-    gm(buffer).bitdepth(8).blackThreshold(95).level(5, 0, 50, 100).toBuffer('PNG', (error, bufferImproved) => {
-      if (error) reject(error);
-      resolve(bufferImproved);
-    });
+    const gmInstance = gm(buffer).bitdepth(8).blackThreshold(95).level(5, 0, 50, 100);
+    resolve((await (0, _helpers.gmToBuffer)(gmInstance)));
   });
 });
 
