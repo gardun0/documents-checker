@@ -90,7 +90,7 @@ export default (firebase, config) => async object => {
 
     await spawn('convert', [tempPath, '-density', '300', tempConvertedPath], { capture: ['stdout', 'stderr'] })
 
-    await spawn('convert', [tempConvertedPath, '-type', 'Grayscale', '-depth', '8', '-level', '50%x55', tempConvertedPath], { capture: ['stdout', 'stderr'] })
+    await spawn('convert', [tempConvertedPath, '-type', 'Grayscale', '-depth', '8', '-level', '70%x55', tempConvertedPath], { capture: ['stdout', 'stderr'] })
 
     await storage.upload(tempConvertedPath, { destination: uploadPath })
 
