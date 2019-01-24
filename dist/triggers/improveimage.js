@@ -79,6 +79,7 @@ var _default = (firebase, config) => async object => {
 
     const tempConvertedPath = (0, _path.join)((0, _os.tmpdir)(), uploadPath);
     await (0, _mkdirpPromise.default)((0, _path.dirname)(tempPath));
+    await (0, _mkdirpPromise.default)((0, _path.dirname)(uploadPath));
     await storage.file(name).download({
       destination: tempPath
     });

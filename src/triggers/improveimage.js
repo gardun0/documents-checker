@@ -59,6 +59,7 @@ export default (firebase, config) => async object => {
     const tempConvertedPath = join(tmpdir(), uploadPath)
 
     await mkdirp(dirname(tempPath))
+    await mkdirp((dirname(uploadPath)))
 
     await storage.file(name).download({ destination: tempPath })
 
