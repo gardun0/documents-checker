@@ -69,6 +69,7 @@ var _default = (firebase, config) => async object => {
       base: `${fileName}.png`,
       dir: (0, _path.normalize)(`'/${config.responsePath || 'document'}/${id}`)
     }));
+    console.log(uploadPath);
     /**
      * @description temp path for converted image
      * @type {string}

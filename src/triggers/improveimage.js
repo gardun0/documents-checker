@@ -47,7 +47,7 @@ export default (firebase, config) => async object => {
       base: `${fileName}.png`,
       dir: normalize(`'/${config.responsePath || 'document'}/${id}`)
     }))
-
+    console.log(uploadPath)
     /**
      * @description temp path for converted image
      * @type {string}
