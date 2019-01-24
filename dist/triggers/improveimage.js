@@ -105,7 +105,7 @@ var _default = firebase => async object => {
     await (0, _childProcessPromise.spawn)('convert', [tempPath, '-density', '300', tempConvertedPath], {
       capture: ['stdout', 'stderr']
     });
-    await (0, _childProcessPromise.spawn)('convert', [tempConvertedPath, '-type', 'Grayscale', '-depth', '8', '-level', '50%x50', '-black-threshold', '87%', tempConvertedPath], {
+    await (0, _childProcessPromise.spawn)('convert', [tempConvertedPath, '-type', 'Grayscale', '-depth', '8', '-level', '70%x30', tempConvertedPath], {
       capture: ['stdout', 'stderr']
     });
     await storage.upload(tempConvertedPath, {
