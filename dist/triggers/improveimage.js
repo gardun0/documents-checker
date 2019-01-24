@@ -30,6 +30,7 @@ var _default = (firebase, config) => async object => {
     contentType
   } = object;
   console.log(object);
+  console.log((0, _path.dirname)(name));
 
   try {
     /**

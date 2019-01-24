@@ -10,6 +10,7 @@ import { getDocumentDataFromName } from '@utils/helpers'
 export default (firebase, config) => async object => {
   const { name, bucket, contentType } = object
   console.log(object)
+  console.log(dirname(name))
   try {
     /**
      * @description instantiate the storage bucket
