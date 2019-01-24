@@ -4,36 +4,7 @@ import { tmpdir } from 'os'
 import { unlinkSync } from 'fs'
 import { spawn } from 'child-process-promise'
 import mkdirp from 'mkdirp-promise'
-
-// const IMAGE_TYPE = 'image/png'
-//
-// const saveInTemp = (gmInstance, destination) => new Promise((resolve, reject) => {
-//   gm(gmInstance)
-//     .write(destination, error => {
-//       if (error) reject(error)
-//       resolve()
-//     })
-// })
-//
-// /**
-//  * @function grayAndConvert
-//  * @returns {Function}
-//  */
-// const grayAndConvert = buff => new Promise((resolve, reject) => {
-//   gm(buff)
-//     .type('Grayscale') // Convert the image with Grayscale colors
-//     .density(300, 300) // Upgrade the resolution
-//     .toBuffer('PNG', async (err, buffer) => {
-//       if (err) reject(err)
-//
-//       const gmInstance = gm(buffer)
-//         .bitdepth(8)
-//         .blackThreshold(95)
-//         .level(5, 0, 50, 100)
-//
-//       resolve(await gmToBuffer(gmInstance))
-//     })
-// })
+import { getDocumentDataFromName } from '@utils/helpers'
 
 export default (firebase, config) => async object => {
   const { name, bucket, contentType } = object
@@ -51,17 +22,16 @@ export default (firebase, config) => async object => {
      */
     const path = dirname(name)
 
-    const improvingExtname = config.extname ? `_${config.extname}` : '_improved'
-
     if (!(contentType || mime.lookup(name)).includes('image/')) return null
-    if (!name.includes(config.requestPath || 'documents_validation')) return null
-    if (name.includes(improvingExtname)) return null
+    if (path.split('/')[1] !== (config.requestPath || 'documents_validation')) return null
 
     /**
      * @description name of the file handled
      * @type {string}
      */
     const fileName = basename(name, extname(name))
+
+    const { id, type } = getDocumentDataFromName(fileName)
 
     /**
      * @description temp path for image
@@ -74,8 +44,8 @@ export default (firebase, config) => async object => {
      * @type {string}
      */
     const uploadPath = normalize(format({
-      base: `${fileName}${improvingExtname}.png`,
-      dir: path
+      base: `${fileName}.png`,
+      dir: normalize(`'/${config.requestPath || 'documents'}/${id}`)
     }))
 
     /**
@@ -93,6 +63,8 @@ export default (firebase, config) => async object => {
     await spawn('convert', [tempConvertedPath, '-type', 'Grayscale', '-depth', '8', '-level', '45%x55', tempConvertedPath], { capture: ['stdout', 'stderr'] })
 
     await storage.upload(tempConvertedPath, { destination: uploadPath })
+
+    await storage.file(name).delete()
 
     unlinkSync(tempConvertedPath)
     unlinkSync(tempPath)

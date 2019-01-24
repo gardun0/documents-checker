@@ -19,35 +19,8 @@ var _childProcessPromise = require("child-process-promise");
 
 var _mkdirpPromise = _interopRequireDefault(require("mkdirp-promise"));
 
-// const IMAGE_TYPE = 'image/png'
-//
-// const saveInTemp = (gmInstance, destination) => new Promise((resolve, reject) => {
-//   gm(gmInstance)
-//     .write(destination, error => {
-//       if (error) reject(error)
-//       resolve()
-//     })
-// })
-//
-// /**
-//  * @function grayAndConvert
-//  * @returns {Function}
-//  */
-// const grayAndConvert = buff => new Promise((resolve, reject) => {
-//   gm(buff)
-//     .type('Grayscale') // Convert the image with Grayscale colors
-//     .density(300, 300) // Upgrade the resolution
-//     .toBuffer('PNG', async (err, buffer) => {
-//       if (err) reject(err)
-//
-//       const gmInstance = gm(buffer)
-//         .bitdepth(8)
-//         .blackThreshold(95)
-//         .level(5, 0, 50, 100)
-//
-//       resolve(await gmToBuffer(gmInstance))
-//     })
-// })
+var _helpers = require("../utils/helpers");
+
 var _default = (firebase, config) => async object => {
   const {
     name,
@@ -68,16 +41,18 @@ var _default = (firebase, config) => async object => {
      */
 
     const path = (0, _path.dirname)(name);
-    const improvingExtname = config.extname ? `_${config.extname}` : '_improved';
     if (!(contentType || _mimeTypes.default.lookup(name)).includes('image/')) return null;
-    if (!name.includes(config.requestPath || 'documents_validation')) return null;
-    if (name.includes(improvingExtname)) return null;
+    if (path.split('/')[1] !== (config.requestPath || 'documents_validation')) return null;
     /**
      * @description name of the file handled
      * @type {string}
      */
 
     const fileName = (0, _path.basename)(name, (0, _path.extname)(name));
+    const {
+      id,
+      type
+    } = (0, _helpers.getDocumentDataFromName)(fileName);
     /**
      * @description temp path for image
      * @type {string}
@@ -90,8 +65,8 @@ var _default = (firebase, config) => async object => {
      */
 
     const uploadPath = (0, _path.normalize)((0, _path.format)({
-      base: `${fileName}${improvingExtname}.png`,
-      dir: path
+      base: `${fileName}.png`,
+      dir: (0, _path.normalize)(`'/${config.requestPath || 'documents'}/${id}`)
     }));
     /**
      * @description temp path for converted image
@@ -112,6 +87,7 @@ var _default = (firebase, config) => async object => {
     await storage.upload(tempConvertedPath, {
       destination: uploadPath
     });
+    await storage.file(name).delete();
     (0, _fs.unlinkSync)(tempConvertedPath);
     (0, _fs.unlinkSync)(tempPath);
     return null;

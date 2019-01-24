@@ -3,13 +3,23 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.gmToBuffer = exports.errorResponse = exports.successResponse = exports.optionalProperty = void 0;
+exports.errorResponse = exports.successResponse = exports.optionalProperty = exports.getDocumentDataFromName = void 0;
 
 var _ramda = require("ramda");
 
 /**
  * GENERAL HELPERS
  */
+const getDocumentDataFromName = str => {
+  const [id, type] = str.split('_');
+  return {
+    id,
+    type
+  };
+};
+
+exports.getDocumentDataFromName = getDocumentDataFromName;
+
 const optionalProperty = (prop, customName) => prop && customName ? {
   [customName]: prop
 } : {};
@@ -31,26 +41,3 @@ const errorResponse = (status = 200, error, message) => ({
 });
 
 exports.errorResponse = errorResponse;
-
-const gmToBuffer = data => new Promise((resolve, reject) => {
-  data.stream((err, stdout, stderr) => {
-    if (err) {
-      return reject(err);
-    }
-
-    const chunks = [];
-    stdout.on('data', chunk => {
-      chunks.push(chunk);
-    }); // these are 'once' because they can and do fire multiple times for multiple errors,
-    // but this is a promise so you'll have to deal with them one at a time
-
-    stdout.once('end', () => {
-      resolve(Buffer.concat(chunks));
-    });
-    stderr.once('data', data => {
-      reject(String(data));
-    });
-  });
-});
-
-exports.gmToBuffer = gmToBuffer;
