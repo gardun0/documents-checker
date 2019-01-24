@@ -3,7 +3,7 @@
  */
 import { checkDocument, improveImage } from '@triggers'
 
-export default firebase => {
+export default (firebase, config = {}) => {
   return {
     /**
      * @description https function that validates documents already improved
@@ -15,6 +15,6 @@ export default firebase => {
      * @description Storage function that improves images for better Vision results
      * @type {Function}
      */
-    ImproveImage: improveImage(firebase)
+    ImproveImage: improveImage(firebase, config)
   }
 }

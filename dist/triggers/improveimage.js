@@ -48,7 +48,7 @@ var _mkdirpPromise = _interopRequireDefault(require("mkdirp-promise"));
 //       resolve(await gmToBuffer(gmInstance))
 //     })
 // })
-var _default = firebase => async object => {
+var _default = (firebase, config) => async object => {
   const {
     name,
     bucket,
@@ -68,9 +68,10 @@ var _default = firebase => async object => {
      */
 
     const path = (0, _path.dirname)(name);
+    const improvingExtname = config.extname ? `_${config.extname}` : '_improved';
     if (!(contentType || _mimeTypes.default.lookup(name)).includes('image/')) return null;
-    if (!name.includes('waiting')) return null;
-    if (name.includes('_improved')) return null;
+    if (!name.includes(config.requestPath || 'documents_validation')) return null;
+    if (name.includes(improvingExtname)) return null;
     /**
      * @description name of the file handled
      * @type {string}
@@ -89,7 +90,7 @@ var _default = firebase => async object => {
      */
 
     const uploadPath = (0, _path.normalize)((0, _path.format)({
-      base: `${fileName}_improved.png`,
+      base: `${fileName}${improvingExtname}.png`,
       dir: path
     }));
     /**
@@ -105,7 +106,7 @@ var _default = firebase => async object => {
     await (0, _childProcessPromise.spawn)('convert', [tempPath, '-density', '300', tempConvertedPath], {
       capture: ['stdout', 'stderr']
     });
-    await (0, _childProcessPromise.spawn)('convert', [tempConvertedPath, '-type', 'Grayscale', '-depth', '8', '-level', '70%x50', tempConvertedPath], {
+    await (0, _childProcessPromise.spawn)('convert', [tempConvertedPath, '-type', 'Grayscale', '-depth', '8', '-level', '50%x55', tempConvertedPath], {
       capture: ['stdout', 'stderr']
     });
     await storage.upload(tempConvertedPath, {

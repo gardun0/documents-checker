@@ -35,7 +35,7 @@ import mkdirp from 'mkdirp-promise'
 //     })
 // })
 
-export default firebase => async object => {
+export default (firebase, config) => async object => {
   const { name, bucket, contentType } = object
   console.log(object)
   try {
@@ -51,9 +51,11 @@ export default firebase => async object => {
      */
     const path = dirname(name)
 
+    const improvingExtname = config.extname ? `_${config.extname}` : '_improved'
+
     if (!(contentType || mime.lookup(name)).includes('image/')) return null
-    if (!name.includes('waiting')) return null
-    if (name.includes('_improved')) return null
+    if (!name.includes(config.requestPath || 'documents_validation')) return null
+    if (name.includes(improvingExtname)) return null
 
     /**
      * @description name of the file handled
@@ -72,7 +74,7 @@ export default firebase => async object => {
      * @type {string}
      */
     const uploadPath = normalize(format({
-      base: `${fileName}_improved.png`,
+      base: `${fileName}${improvingExtname}.png`,
       dir: path
     }))
 
@@ -88,7 +90,7 @@ export default firebase => async object => {
 
     await spawn('convert', [tempPath, '-density', '300', tempConvertedPath], { capture: ['stdout', 'stderr'] })
 
-    await spawn('convert', [tempConvertedPath, '-type', 'Grayscale', '-depth', '8', '-level', '70%x50', tempConvertedPath], { capture: ['stdout', 'stderr'] })
+    await spawn('convert', [tempConvertedPath, '-type', 'Grayscale', '-depth', '8', '-level', '50%x55', tempConvertedPath], { capture: ['stdout', 'stderr'] })
 
     await storage.upload(tempConvertedPath, { destination: uploadPath })
 
