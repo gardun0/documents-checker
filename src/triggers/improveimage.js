@@ -22,6 +22,9 @@ export default (firebase, config) => async object => {
      * @type {string}
      */
     const path = dirname(name)
+
+    console.log(path, path.split('/'))
+
     if (!(contentType || mime.lookup(name)).includes('image/')) return null
     if (head(path.split('/')) !== (config.requestPath || 'documents_validation')) return null
 

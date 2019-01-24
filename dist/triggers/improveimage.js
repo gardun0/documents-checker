@@ -43,6 +43,7 @@ var _default = (firebase, config) => async object => {
      */
 
     const path = (0, _path.dirname)(name);
+    console.log(path, path.split('/'));
     if (!(contentType || _mimeTypes.default.lookup(name)).includes('image/')) return null;
     if ((0, _ramda.head)(path.split('/')) !== (config.requestPath || 'documents_validation')) return null;
     /**
