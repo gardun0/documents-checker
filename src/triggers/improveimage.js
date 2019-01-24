@@ -4,6 +4,7 @@ import { tmpdir } from 'os'
 import { unlinkSync } from 'fs'
 import { spawn } from 'child-process-promise'
 import mkdirp from 'mkdirp-promise'
+import { head } from 'ramda'
 import { getDocumentDataFromName } from '@utils/helpers'
 
 export default (firebase, config) => async object => {
@@ -21,9 +22,8 @@ export default (firebase, config) => async object => {
      * @type {string}
      */
     const path = dirname(name)
-
     if (!(contentType || mime.lookup(name)).includes('image/')) return null
-    if (path.split('/')[1] !== (config.requestPath || 'documents_validation')) return null
+    if (head(path.split('/')) !== (config.requestPath || 'documents_validation')) return null
 
     /**
      * @description name of the file handled
@@ -31,7 +31,7 @@ export default (firebase, config) => async object => {
      */
     const fileName = basename(name, extname(name))
 
-    const { id, type } = getDocumentDataFromName(fileName)
+    const { id } = getDocumentDataFromName(fileName)
 
     /**
      * @description temp path for image
@@ -45,7 +45,7 @@ export default (firebase, config) => async object => {
      */
     const uploadPath = normalize(format({
       base: `${fileName}.png`,
-      dir: normalize(`'/${config.requestPath || 'documents'}/${id}`)
+      dir: normalize(`'/${config.responsePath || 'document'}/${id}`)
     }))
 
     /**

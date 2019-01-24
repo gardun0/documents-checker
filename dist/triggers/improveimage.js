@@ -19,6 +19,8 @@ var _childProcessPromise = require("child-process-promise");
 
 var _mkdirpPromise = _interopRequireDefault(require("mkdirp-promise"));
 
+var _ramda = require("ramda");
+
 var _helpers = require("../utils/helpers");
 
 var _default = (firebase, config) => async object => {
@@ -42,7 +44,7 @@ var _default = (firebase, config) => async object => {
 
     const path = (0, _path.dirname)(name);
     if (!(contentType || _mimeTypes.default.lookup(name)).includes('image/')) return null;
-    if (path.split('/')[1] !== (config.requestPath || 'documents_validation')) return null;
+    if ((0, _ramda.head)(path.split('/')) !== (config.requestPath || 'documents_validation')) return null;
     /**
      * @description name of the file handled
      * @type {string}
@@ -50,8 +52,7 @@ var _default = (firebase, config) => async object => {
 
     const fileName = (0, _path.basename)(name, (0, _path.extname)(name));
     const {
-      id,
-      type
+      id
     } = (0, _helpers.getDocumentDataFromName)(fileName);
     /**
      * @description temp path for image
@@ -66,7 +67,7 @@ var _default = (firebase, config) => async object => {
 
     const uploadPath = (0, _path.normalize)((0, _path.format)({
       base: `${fileName}.png`,
-      dir: (0, _path.normalize)(`'/${config.requestPath || 'documents'}/${id}`)
+      dir: (0, _path.normalize)(`'/${config.responsePath || 'document'}/${id}`)
     }));
     /**
      * @description temp path for converted image
