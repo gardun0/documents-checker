@@ -296,9 +296,9 @@ var _default = (firebase, config) => async object => {
     name,
     bucket
   } = object;
+  console.log(object);
   const storage = firebase.storage().bucket(bucket);
   const database = (0, _firebase.default)(firebase);
-  console.log(object);
 
   try {
     /**
@@ -307,7 +307,7 @@ var _default = (firebase, config) => async object => {
     const path = (0, _path.dirname)(name);
     const fileName = (0, _path.basename)(name, (0, _path.extname)(name));
     if ((0, _ramda.head)(path.split('/')) !== (config.responsePath || 'documents')) return null;
-    if (fileName !== 'INEA' || fileName !== 'INER' || fileName !== 'CD') return null;
+    if (fileName !== 'INEA' && fileName !== 'INER' && fileName !== 'CD') return null;
     const [, uId] = path.split('/');
     const userData = await database.fetch(`/fisa_renewals/${uId}`);
 

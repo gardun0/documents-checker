@@ -283,9 +283,9 @@ export default (firebase, config) => async object => {
      */
     const path = dirname(name)
     const fileName = basename(name, extname(name))
-    console.log(fileName)
+
     if (head(path.split('/')) !== (config.responsePath || 'documents')) return null
-    if (fileName !== 'INEA' || fileName !== 'INER' || fileName !== 'CD') return null
+    if (fileName !== 'INEA' && fileName !== 'INER' && fileName !== 'CD') return null
 
     const [ , uId ] = path.split('/')
 

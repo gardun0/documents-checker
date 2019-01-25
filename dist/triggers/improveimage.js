@@ -78,12 +78,6 @@ var _default = (firebase, config) => async object => {
       base: `${fileName}.png`,
       dir: (0, _path.dirname)(tempPath)
     }));
-    /**
-     * @description temp path for converted image
-     * @type {string}
-     */
-
-    const tempConvertedPath = (0, _path.join)((0, _os.tmpdir)(), uploadPath);
     await (0, _mkdirpPromise.default)((0, _path.dirname)(tempPath));
     await (0, _mkdirpPromise.default)((0, _path.join)((0, _os.tmpdir)(), uploadPath));
     await storage.file(name).download({
@@ -99,7 +93,6 @@ var _default = (firebase, config) => async object => {
       destination: uploadPath
     });
     await storage.file(name).delete();
-    (0, _fs.unlinkSync)(tempConvertedPath);
     (0, _fs.unlinkSync)(tempPath);
     return null;
   } catch (err) {
