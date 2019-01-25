@@ -9,8 +9,7 @@ import { getDocumentDataFromName } from '@utils/helpers'
 
 export default (firebase, config) => async object => {
   const { name, bucket, contentType } = object
-  console.log(object)
-  console.log(dirname(name))
+
   try {
     /**
      * @description instantiate the storage bucket
@@ -23,8 +22,6 @@ export default (firebase, config) => async object => {
      * @type {string}
      */
     const path = dirname(name)
-
-    console.log(path, path.split('/'))
 
     if (!(contentType || mime.lookup(name)).includes('image/')) return null
     if (head(path.split('/')) !== (config.requestPath || 'documents_validation')) return null
@@ -52,11 +49,15 @@ export default (firebase, config) => async object => {
       dir: normalize(`/${config.responsePath || 'documents'}/${id}`)
     }))
 
+    /**
+     * @description temporal path for upload photo
+     * @type {string}
+     */
     const uploadTempPath = normalize(format({
       base: `${fileName}.png`,
       dir: dirname(tempPath)
     }))
-    console.log(uploadPath)
+
     /**
      * @description temp path for converted image
      * @type {string}

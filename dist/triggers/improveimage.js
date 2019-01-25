@@ -29,8 +29,6 @@ var _default = (firebase, config) => async object => {
     bucket,
     contentType
   } = object;
-  console.log(object);
-  console.log((0, _path.dirname)(name));
 
   try {
     /**
@@ -44,7 +42,6 @@ var _default = (firebase, config) => async object => {
      */
 
     const path = (0, _path.dirname)(name);
-    console.log(path, path.split('/'));
     if (!(contentType || _mimeTypes.default.lookup(name)).includes('image/')) return null;
     if ((0, _ramda.head)(path.split('/')) !== (config.requestPath || 'documents_validation')) return null;
     /**
@@ -71,11 +68,15 @@ var _default = (firebase, config) => async object => {
       base: `${fileName}.png`,
       dir: (0, _path.normalize)(`/${config.responsePath || 'documents'}/${id}`)
     }));
+    /**
+     * @description temporal path for upload photo
+     * @type {string}
+     */
+
     const uploadTempPath = (0, _path.normalize)((0, _path.format)({
       base: `${fileName}.png`,
       dir: (0, _path.dirname)(tempPath)
     }));
-    console.log(uploadPath);
     /**
      * @description temp path for converted image
      * @type {string}
