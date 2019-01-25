@@ -69,7 +69,7 @@ var _default = (firebase, config) => async object => {
 
     const uploadPath = (0, _path.normalize)((0, _path.format)({
       base: `${fileName}.png`,
-      dir: (0, _path.normalize)(`'/${config.responsePath || 'document'}/${id}`)
+      dir: (0, _path.normalize)(`'/${config.responsePath || 'documents'}/${id}`)
     }));
     console.log(uploadPath);
     /**
@@ -79,7 +79,7 @@ var _default = (firebase, config) => async object => {
 
     const tempConvertedPath = (0, _path.join)((0, _os.tmpdir)(), uploadPath);
     await (0, _mkdirpPromise.default)((0, _path.dirname)(tempPath));
-    await (0, _mkdirpPromise.default)((0, _path.dirname)(uploadPath));
+    await (0, _mkdirpPromise.default)((0, _path.join)((0, _os.tmpdir)(), uploadPath));
     await storage.file(name).download({
       destination: tempPath
     });

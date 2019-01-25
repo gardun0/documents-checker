@@ -49,7 +49,7 @@ export default (firebase, config) => async object => {
      */
     const uploadPath = normalize(format({
       base: `${fileName}.png`,
-      dir: normalize(`'/${config.responsePath || 'document'}/${id}`)
+      dir: normalize(`'/${config.responsePath || 'documents'}/${id}`)
     }))
     console.log(uploadPath)
     /**
@@ -59,7 +59,7 @@ export default (firebase, config) => async object => {
     const tempConvertedPath = join(tmpdir(), uploadPath)
 
     await mkdirp(dirname(tempPath))
-    await mkdirp((dirname(uploadPath)))
+    await mkdirp(join(tmpdir(), uploadPath))
 
     await storage.file(name).download({ destination: tempPath })
 
