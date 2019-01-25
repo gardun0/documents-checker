@@ -51,6 +51,11 @@ export default (firebase, config) => async object => {
       base: `${fileName}.png`,
       dir: normalize(`/${config.responsePath || 'documents'}/${id}`)
     }))
+
+    const uploadTempPath = normalize(format({
+      base: `${fileName}.png`,
+      dir: dirname(tempPath)
+    }))
     console.log(uploadPath)
     /**
      * @description temp path for converted image
@@ -63,11 +68,11 @@ export default (firebase, config) => async object => {
 
     await storage.file(name).download({ destination: tempPath })
 
-    await spawn('convert', [tempPath, '-density', '300', tempConvertedPath], { capture: ['stdout', 'stderr'] })
+    await spawn('convert', [tempPath, '-density', '300', uploadTempPath], { capture: ['stdout', 'stderr'] })
 
-    await spawn('convert', [tempConvertedPath, '-type', 'Grayscale', '-depth', '8', '-level', '45%x55', tempConvertedPath], { capture: ['stdout', 'stderr'] })
+    await spawn('convert', [uploadTempPath, '-type', 'Grayscale', '-depth', '8', '-level', '45%x55', uploadTempPath], { capture: ['stdout', 'stderr'] })
 
-    await storage.upload(tempConvertedPath, { destination: uploadPath })
+    await storage.upload(uploadTempPath, { destination: uploadPath })
 
     await storage.file(name).delete()
 
