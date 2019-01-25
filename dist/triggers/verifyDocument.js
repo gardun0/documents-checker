@@ -298,6 +298,7 @@ var _default = (firebase, config) => async object => {
   } = object;
   const storage = firebase.storage().bucket(bucket);
   const database = (0, _firebase.default)(firebase);
+  console.log(object);
 
   try {
     /**
