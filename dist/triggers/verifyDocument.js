@@ -11,32 +11,29 @@ var _moment = _interopRequireDefault(require("moment"));
 
 var _helpers = require("../utils/helpers");
 
+var _firebase = _interopRequireDefault(require("../utils/firebase"));
+
 var _ramda = require("ramda");
 
 var _stringSimilarity = require("string-similarity");
+
+var _path = require("path");
+
+var _os = require("os");
+
+var _fs = require("fs");
 
 var _axios = _interopRequireDefault(require("axios"));
 
 const vision = require('@google-cloud/vision');
 
-const {
-  NODE_ENV = 'production'
-} = process.env;
 const CONFIDENCE_SPECTRE = 0.4;
-/**
- * @description requires gm module and set subClass on production environment
- * @type {gm}
- */
-
-const gm = require('gm').subClass({
-  imageMagick: NODE_ENV !== 'development'
-});
+const arrayWordToString = (0, _ramda.join)('');
 /**
  * @description converts milliseconds to INE's date format
  * @param ms
  * @returns {string}
  */
-
 
 const getDateFromMS = ms => (0, _moment.default)(new Date(ms * 1)).format('DD/MM/YYYY');
 
@@ -48,10 +45,10 @@ const match = (0, _ramda.curry)((regex, str) => str.match(regex));
  */
 
 const INE_A_PROPERTIES = [{
-  value: 'apellidoPat',
+  value: 'apellidoPaterno',
   transform: _ramda.toUpper
 }, {
-  value: 'apellidoMat',
+  value: 'apellidoMaterno',
   transform: _ramda.toUpper
 }, {
   value: 'nombre',
@@ -60,7 +57,7 @@ const INE_A_PROPERTIES = [{
   value: 'curp',
   transform: _ramda.toUpper
 }, {
-  value: 'fechaNacimiento',
+  value: 'fecha',
   transform: getDateFromMS
 }];
 /**
@@ -69,10 +66,10 @@ const INE_A_PROPERTIES = [{
  */
 
 const INE_R_PROPERTIES = [{
-  value: 'apellidoPat',
+  value: 'apellidoPaterno',
   transform: _ramda.toUpper
 }, {
-  value: 'apellidoMat',
+  value: 'apellidoMaterno',
   transform: _ramda.toUpper
 }, {
   value: 'nombre',
@@ -90,13 +87,13 @@ const CD_PROPERTIES = [{
   value: 'colonia',
   transform: _ramda.toUpper
 }, {
-  value: 'cp',
+  value: 'codigoPostal',
   transform: _ramda.toUpper
 }, {
-  value: 'apellidoPat',
+  value: 'apellidoPaterno',
   transform: _ramda.toUpper
 }, {
-  value: 'apellidoMat',
+  value: 'apellidoMaterno',
   transform: _ramda.toUpper
 }, {
   value: 'nombre',
@@ -126,38 +123,6 @@ const getDataToMatch = source => props => (props.length ? props : []).reduce((ac
     [typeof prop === 'string' ? prop : prop.value]: hasTransform ? prop.transform(source[prop.value]) : typeof prop === 'string' ? source[prop] : source[prop.value]
   };
 }, {});
-/**
- * @function improveImage
- * @param buff
- * @returns {Promise<*>}
- */
-
-
-const improveImage = async buff => {
-  const gmInstance = gm(buff).bitdepth(8).blackThreshold(95).level(5, 0, 50, 100);
-  return (0, _helpers.gmToBuffer)(gmInstance);
-};
-
-const arrayWordToString = (0, _ramda.join)('');
-/**
- * @function grayAndConvert
- * @param buff
- * @returns {Promise<any>}
- */
-
-const grayAndConvert = buff => new Promise((resolve, reject) => {
-  gm(buff).type('Grayscale') // Convert the image with Grayscale colors
-  .toBuffer('PNG', async (err, buffer) => {
-    /**
-     * We transform any image to PNG format
-     * JPEG like other formats have compression
-     * so we have to be able to get a better image
-     * no matter what
-     */
-    if (err) reject(err);
-    resolve((await improveImage(buffer)));
-  });
-});
 /**
  * @description gets the result from Google Vision API
  * @param imageBuffer
@@ -322,96 +287,71 @@ const getConfidenceResult = data => (0, _ramda.compose)((0, _ramda.divide)(_ramd
 const compareWords = compareWith => (0, _ramda.compose)(getConfidenceResult((0, _ramda.keys)(compareWith)), unifyDoubles(compareWith), getConfidenceByWord(compareWith));
 /**
  * @description main function
- * @param req
- * @param res
  * @returns {Promise<Response>}
  */
 
 
-var _default = firebase => async (req, res) => {
+var _default = (firebase, config) => async object => {
   const {
-    method,
-    body
-  } = req;
-  const {
-    image = {},
-    info
-  } = body;
+    name,
+    bucket
+  } = object;
+  const storage = firebase.storage().bucket(bucket);
+  const database = (0, _firebase.default)(firebase);
 
   try {
     /**
      * BEFORE EVERYTHING STARTS
      */
-    if (method !== 'POST') return res.status(403).send((0, _helpers.errorResponse)(403, 'Solo se permite metodo POST'));
-    if (!image.url || !image.type) return res.status(403).send((0, _helpers.errorResponse)(403, 'Hacen falta parametros de la imagen'));
-    if (image.type !== 'INEA' && image.type !== 'INER' && image.type !== 'CD') return res.status(403).send((0, _helpers.errorResponse)(403, 'Tipo de imagen invalido'));
-    if (!info) return res.status(403).send((0, _helpers.errorResponse)(403, 'Informacion de usuario requerida'));
+    const path = (0, _path.dirname)(name);
+    const fileName = (0, _path.basename)(name, (0, _path.extname)(name));
+    if ((0, _ramda.head)(path.split('/')) !== (config.responsePath || 'documents')) return null;
+    if (fileName !== 'INEA' || fileName !== 'INER' || fileName !== 'CD') return null;
+    const [, uId] = path.split('/');
+    const userData = await database.fetch(`/fisa_renewals/${uId}`);
+
+    if (!userData.nombre) {
+      await database.update(`/fisa_documents/${uId}/${fileName}`, 0);
+      return null;
+    }
     /**
      * @var getAndTransform
      * @type function(*): {object}
      */
 
-    const getAndTransform = getDataToMatch(info);
-    console.log(info);
+
+    const getAndTransform = getDataToMatch(userData);
     /**
      * @var propertiesByType
      * @description Gets the properties to evaluate for this type of image
      * @type object[]
      */
 
-    const propertiesByType = image.type === 'INEA' ? INE_A_PROPERTIES : image.type === 'INER' ? INE_R_PROPERTIES : image.type === 'CD' ? CD_PROPERTIES : [];
-    console.log(propertiesByType);
+    const propertiesByType = fileName === 'INEA' ? INE_A_PROPERTIES : fileName === 'INER' ? INE_R_PROPERTIES : fileName === 'CD' ? CD_PROPERTIES : [];
     /**
      * @constant dataToUse
      * @type {object}
      */
 
     const wordToMatch = getAndTransform(propertiesByType);
-    console.log(image.url);
-    const {
-      data: imageData
-    } = await _axios.default.get(image.url, {
-      responseType: 'arraybuffer',
-      transformResponse: [data => Buffer.from(data)]
-    });
-    console.log(imageData);
-    /**
-     * @description result from image improved
-     * @type {any}
-     */
+    const imageData = await storage.file(name).download();
+    const visionResult = await getImageAndRequest(imageData);
 
-    const imageImproved = await grayAndConvert(imageData);
+    if (!visionResult.pages) {
+      await database.update(`/fisa_documents/${uId}/${fileName}`, 0);
+      return null;
+    }
+
     const {
       pages: [result]
-    } = await getImageAndRequest(imageImproved);
+    } = visionResult;
     const {
-      blocks = [],
-      property: {
-        detectedLanguages = []
-      }
+      blocks = []
     } = { ...result,
       ...(0, _helpers.optionalProperty)(result.property ? null : {
         detectedLanguages: []
       }, 'property')
     };
-    /**
-     * @description get predominant language
-     * @type {object}
-     */
-
-    const predominantLanguage = detectedLanguages.reduce(({
-      languageCode: lastLanguageCode,
-      confidence: lastConfidence
-    }, {
-      languageCode,
-      confidence
-    }) => ({
-      languageCode: lastConfidence > confidence ? lastLanguageCode : languageCode,
-      confidence: lastConfidence > confidence ? lastConfidence : confidence
-    }), {
-      languageCode: 'es',
-      confidence: 0
-    });
     /**
      * @description filter, order and compare all the words found from Vision API and get a confidence percentage
      * @type {Function}
@@ -419,12 +359,10 @@ var _default = firebase => async (req, res) => {
      */
 
     const getResult = (0, _ramda.compose)(compareWords(wordToMatch), getWords);
-    res.status(200).send((0, _helpers.successResponse)(200, {
-      confidence: getResult(blocks),
-      language: predominantLanguage.languageCode
-    }));
+    await database.update(`/fisa_documents/${uId}/${fileName}`, getResult(blocks));
+    return null;
   } catch (err) {
-    return res.status(500).send((0, _helpers.errorResponse)(500, 'INTERNAL_ERROR', err.message));
+    console.error(err);
   }
 };
 

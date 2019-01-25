@@ -1,23 +1,23 @@
-import * as firebase from 'firebase-admin'
+export default firebase => {
+  const root = firebase.database().ref('/')
 
-export const db = firebase.database().ref('/')
+  return {
+    fetch: async (path = '') => {
+      const querySnapshot = await root.child(path).once('value')
 
-export const $fetch = async (path = '') => {
-  const querySnapshot = await db.child(path).once('value')
+      return querySnapshot.exists() ? querySnapshot.val() : {}
+    },
+    update: async (path = '', data) => {
+      await root.child(path).update(data)
 
-  return querySnapshot.exists() ? querySnapshot.val() : {}
-}
+      return data
+    },
+    remove: async (path = '', data) => {
+      await root.child(path).remove()
 
-export const $update = async (path = '', data) => {
-  await db.child(path).update(data)
-
-  return data
-}
-
-export const $remove = async (path = '', data) => {
-  await db.child(path).remove()
-
-  return data
+      return data
+    }
+  }
 }
 
 export const generatePushID = timestamp => {

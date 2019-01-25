@@ -1,20 +1,16 @@
 /**
  * @description source generator of the triggers
  */
-import { checkDocument, improveImage } from '@triggers'
+import { improveImage, verify } from '@triggers'
 
 export default (firebase, config = {}) => {
   return {
     /**
-     * @description https function that validates documents already improved
-     * @type {Function}
-     */
-    CheckDocument: checkDocument(firebase),
-
-    /**
      * @description Storage function that improves images for better Vision results
      * @type {Function}
      */
-    ImproveImage: improveImage(firebase, config)
+    ImproveImage: improveImage(firebase, config),
+
+    VerifyDocument: verify(firebase, config)
   }
 }

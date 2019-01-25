@@ -5,10 +5,10 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-Object.defineProperty(exports, "checkDocument", {
+Object.defineProperty(exports, "verify", {
   enumerable: true,
   get: function () {
-    return _checkDocument.default;
+    return _verifyDocument.default;
   }
 });
 Object.defineProperty(exports, "improveImage", {
@@ -18,6 +18,6 @@ Object.defineProperty(exports, "improveImage", {
   }
 });
 
-var _checkDocument = _interopRequireDefault(require("./checkDocument"));
+var _verifyDocument = _interopRequireDefault(require("./verifyDocument"));
 
 var _improveimage = _interopRequireDefault(require("./improveimage"));

@@ -1,37 +1,29 @@
 "use strict";
 
-var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.generatePushID = exports.$remove = exports.$update = exports.$fetch = exports.db = void 0;
+exports.generatePushID = exports.default = void 0;
 
-var firebase = _interopRequireWildcard(require("firebase-admin"));
-
-const db = firebase.database().ref('/');
-exports.db = db;
-
-const $fetch = async (path = '') => {
-  const querySnapshot = await db.child(path).once('value');
-  return querySnapshot.exists() ? querySnapshot.val() : {};
+var _default = firebase => {
+  const root = firebase.database().ref('/');
+  return {
+    fetch: async (path = '') => {
+      const querySnapshot = await root.child(path).once('value');
+      return querySnapshot.exists() ? querySnapshot.val() : {};
+    },
+    update: async (path = '', data) => {
+      await root.child(path).update(data);
+      return data;
+    },
+    remove: async (path = '', data) => {
+      await root.child(path).remove();
+      return data;
+    }
+  };
 };
 
-exports.$fetch = $fetch;
-
-const $update = async (path = '', data) => {
-  await db.child(path).update(data);
-  return data;
-};
-
-exports.$update = $update;
-
-const $remove = async (path = '', data) => {
-  await db.child(path).remove();
-  return data;
-};
-
-exports.$remove = $remove;
+exports.default = _default;
 
 const generatePushID = timestamp => {
   const PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';

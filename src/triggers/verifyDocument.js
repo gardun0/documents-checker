@@ -1,20 +1,18 @@
 import moment from 'moment'
 import { gmToBuffer, errorResponse, successResponse, optionalProperty } from '@utils/helpers'
-import { toUpper, compose, prop, map, join, reduce, split, keys, curry, divide, __ } from 'ramda'
+import databaseWrapper from '@utils/firebase'
+import { toUpper, compose, prop, map, join, reduce, split, keys, curry, divide, __, head } from 'ramda'
 import { compareTwoStrings } from 'string-similarity'
+import { basename, extname, dirname, format, normalize, join as pathJoin } from 'path'
+import { tmpdir } from 'os'
+import { unlinkSync } from 'fs'
 import axios from 'axios'
 
 const vision = require('@google-cloud/vision')
 
-const { NODE_ENV = 'production' } = process.env
-
 const CONFIDENCE_SPECTRE = 0.4
 
-/**
- * @description requires gm module and set subClass on production environment
- * @type {gm}
- */
-const gm = require('gm').subClass({ imageMagick: NODE_ENV !== 'development' })
+const arrayWordToString = join('')
 
 /**
  * @description converts milliseconds to INE's date format
@@ -31,11 +29,11 @@ const match = curry((regex, str) => str.match(regex))
  * @type {array}
  */
 const INE_A_PROPERTIES = [
-  { value: 'apellidoPat', transform: toUpper },
-  { value: 'apellidoMat', transform: toUpper },
+  { value: 'apellidoPaterno', transform: toUpper },
+  { value: 'apellidoMaterno', transform: toUpper },
   { value: 'nombre', transform: toUpper },
   { value: 'curp', transform: toUpper },
-  { value: 'fechaNacimiento', transform: getDateFromMS }
+  { value: 'fecha', transform: getDateFromMS }
 ]
 
 /**
@@ -43,8 +41,8 @@ const INE_A_PROPERTIES = [
  * @type {array}
  */
 const INE_R_PROPERTIES = [
-  { value: 'apellidoPat', transform: toUpper },
-  { value: 'apellidoMat', transform: toUpper },
+  { value: 'apellidoPaterno', transform: toUpper },
+  { value: 'apellidoMaterno', transform: toUpper },
   { value: 'nombre', transform: toUpper }
 ]
 
@@ -55,9 +53,9 @@ const INE_R_PROPERTIES = [
 const CD_PROPERTIES = [
   { value: 'calle', transform: toUpper },
   { value: 'colonia', transform: toUpper },
-  { value: 'cp', transform: toUpper },
-  { value: 'apellidoPat', transform: toUpper },
-  { value: 'apellidoMat', transform: toUpper },
+  { value: 'codigoPostal', transform: toUpper },
+  { value: 'apellidoPaterno', transform: toUpper },
+  { value: 'apellidoMaterno', transform: toUpper },
   { value: 'nombre', transform: toUpper },
   { value: 'estado', transform: toUpper },
   { value: 'municipio', transform: toUpper }
@@ -86,42 +84,6 @@ const getDataToMatch = source => props => (props.length ? props : [])
           : source[prop.value]
     }
   }, {})
-
-/**
- * @function improveImage
- * @param buff
- * @returns {Promise<*>}
- */
-const improveImage = async buff => {
-  const gmInstance = gm(buff)
-    .bitdepth(8)
-    .blackThreshold(95)
-    .level(5, 0, 50, 100)
-
-  return gmToBuffer(gmInstance)
-}
-
-const arrayWordToString = join('')
-
-/**
- * @function grayAndConvert
- * @param buff
- * @returns {Promise<any>}
- */
-const grayAndConvert = buff => new Promise((resolve, reject) => {
-  gm(buff)
-    .type('Grayscale') // Convert the image with Grayscale colors
-    .toBuffer('PNG', async (err, buffer) => {
-      /**
-       * We transform any image to PNG format
-       * JPEG like other formats have compression
-       * so we have to be able to get a better image
-       * no matter what
-       */
-      if (err) reject(err)
-      resolve(await improveImage(buffer))
-    })
-})
 
 /**
  * @description gets the result from Google Vision API
@@ -307,77 +269,76 @@ const compareWords = compareWith => compose(
 
 /**
  * @description main function
- * @param req
- * @param res
  * @returns {Promise<Response>}
  */
-export default firebase => async (req, res) => {
-  const { method, body } = req
+export default (firebase, config) => async object => {
+  const { name, bucket } = object
 
-  const { image = {}, info } = body
+  const storage = firebase.storage().bucket(bucket)
+
+  const database = databaseWrapper(firebase)
 
   try {
     /**
      * BEFORE EVERYTHING STARTS
      */
-    if (method !== 'POST') return res.status(403).send(errorResponse(403, 'Solo se permite metodo POST'))
-    if (!image.url || !image.type) return res.status(403).send(errorResponse(403, 'Hacen falta parametros de la imagen'))
-    if (image.type !== 'INEA' && image.type !== 'INER' && image.type !== 'CD') return res.status(403).send(errorResponse(403, 'Tipo de imagen invalido'))
-    if (!info) return res.status(403).send(errorResponse(403, 'Informacion de usuario requerida'))
+    const path = dirname(name)
+    const fileName = basename(name, extname(name))
+
+    if (head(path.split('/')) !== (config.responsePath || 'documents')) return null
+    if (fileName !== 'INEA' || fileName !== 'INER' || fileName !== 'CD') return null
+
+    const [ , uId ] = path.split('/')
+
+    const userData = await database.fetch(`/fisa_renewals/${uId}`)
+
+    if (!userData.nombre) {
+      await database.update(`/fisa_documents/${uId}/${fileName}`, 0)
+      return null
+    }
 
     /**
      * @var getAndTransform
      * @type function(*): {object}
      */
-    const getAndTransform = getDataToMatch(info)
-    console.log(info)
+    const getAndTransform = getDataToMatch(userData)
+
     /**
      * @var propertiesByType
      * @description Gets the properties to evaluate for this type of image
      * @type object[]
      */
-    const propertiesByType = image.type === 'INEA'
+    const propertiesByType = fileName === 'INEA'
       ? INE_A_PROPERTIES
-      : image.type === 'INER'
+      : fileName === 'INER'
         ? INE_R_PROPERTIES
-        : image.type === 'CD'
+        : fileName === 'CD'
           ? CD_PROPERTIES
           : []
-    console.log(propertiesByType)
+
     /**
      * @constant dataToUse
      * @type {object}
      */
     const wordToMatch = getAndTransform(propertiesByType)
-    console.log(image.url)
-    const { data: imageData } = await axios.get(image.url, {
-      responseType: 'arraybuffer',
-      transformResponse: [(data) => Buffer.from(data)]
-    })
-    console.log(imageData)
-    /**
-     * @description result from image improved
-     * @type {any}
-     */
-    const imageImproved = await grayAndConvert(imageData)
 
-    const { pages: [ result ] } = await getImageAndRequest(imageImproved)
+    const imageData = await storage.file(name).download()
 
-    const { blocks = [], property: { detectedLanguages = [] } } = {
+    const visionResult = await getImageAndRequest(imageData)
+
+    if (!visionResult.pages) {
+      await database.update(`/fisa_documents/${uId}/${fileName}`, 0)
+      return null
+    }
+
+    const { pages: [ result ] } = visionResult
+
+    const { blocks = [] } = {
       ...result,
       ...optionalProperty(result.property
         ? null
         : { detectedLanguages: [] }, 'property')
     }
-
-    /**
-     * @description get predominant language
-     * @type {object}
-     */
-    const predominantLanguage = detectedLanguages.reduce(({ languageCode: lastLanguageCode, confidence: lastConfidence }, { languageCode, confidence }) => ({
-      languageCode: lastConfidence > confidence ? lastLanguageCode : languageCode,
-      confidence: lastConfidence > confidence ? lastConfidence : confidence
-    }), { languageCode: 'es', confidence: 0 })
 
     /**
      * @description filter, order and compare all the words found from Vision API and get a confidence percentage
@@ -389,11 +350,9 @@ export default firebase => async (req, res) => {
       getWords
     )
 
-    res.status(200).send(successResponse(200, {
-      confidence: getResult(blocks),
-      language: predominantLanguage.languageCode
-    }))
+    await database.update(`/fisa_documents/${uId}/${fileName}`, getResult(blocks))
+    return null
   } catch (err) {
-    return res.status(500).send(errorResponse(500, 'INTERNAL_ERROR', err.message))
+    console.error(err)
   }
 }
