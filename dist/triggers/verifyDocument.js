@@ -312,7 +312,9 @@ var _default = (firebase, config) => async object => {
     const userData = await database.fetch(`/fisa_renewals/${uId}`);
 
     if (!userData.nombre) {
-      await database.update(`/fisa_documents/${uId}/${fileName}`, 0);
+      await database.update(`/fisa_documents/${uId}`, {
+        [fileName]: 0
+      });
       console.log('USUARIO INEXISTENTE');
       return null;
     }
@@ -340,7 +342,9 @@ var _default = (firebase, config) => async object => {
     const visionResult = await getImageAndRequest(imageData);
 
     if (!visionResult.pages) {
-      await database.update(`/fisa_documents/${uId}/${fileName}`, 0);
+      await database.update(`/fisa_documents/${uId}`, {
+        [fileName]: 0
+      });
       console.log('SIN RESULTADOS DE VISION');
       return null;
     }
