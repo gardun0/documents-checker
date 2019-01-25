@@ -49,7 +49,7 @@ export default (firebase, config) => async object => {
      */
     const uploadPath = normalize(format({
       base: `${fileName}.png`,
-      dir: normalize(`'/${config.responsePath || 'documents'}/${id}`)
+      dir: normalize(`/${config.responsePath || 'documents'}/${id}`)
     }))
     console.log(uploadPath)
     /**

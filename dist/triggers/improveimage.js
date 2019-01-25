@@ -69,7 +69,7 @@ var _default = (firebase, config) => async object => {
 
     const uploadPath = (0, _path.normalize)((0, _path.format)({
       base: `${fileName}.png`,
-      dir: (0, _path.normalize)(`'/${config.responsePath || 'documents'}/${id}`)
+      dir: (0, _path.normalize)(`/${config.responsePath || 'documents'}/${id}`)
     }));
     console.log(uploadPath);
     /**
