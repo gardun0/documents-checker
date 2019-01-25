@@ -32,7 +32,7 @@ export default (firebase, config) => async object => {
      */
     const fileName = basename(name, extname(name))
 
-    const { id } = getDocumentDataFromName(fileName)
+    const { id, type } = getDocumentDataFromName(fileName)
 
     /**
      * @description temp path for image
@@ -45,7 +45,7 @@ export default (firebase, config) => async object => {
      * @type {string}
      */
     const uploadPath = normalize(format({
-      base: `${fileName}.png`,
+      base: `${type}.png`,
       dir: normalize(`/${config.responsePath || 'documents'}/${id}`)
     }))
 

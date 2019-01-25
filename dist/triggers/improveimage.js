@@ -51,7 +51,8 @@ var _default = (firebase, config) => async object => {
 
     const fileName = (0, _path.basename)(name, (0, _path.extname)(name));
     const {
-      id
+      id,
+      type
     } = (0, _helpers.getDocumentDataFromName)(fileName);
     /**
      * @description temp path for image
@@ -65,7 +66,7 @@ var _default = (firebase, config) => async object => {
      */
 
     const uploadPath = (0, _path.normalize)((0, _path.format)({
-      base: `${fileName}.png`,
+      base: `${type}.png`,
       dir: (0, _path.normalize)(`/${config.responsePath || 'documents'}/${id}`)
     }));
     /**
