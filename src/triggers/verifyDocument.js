@@ -273,11 +273,10 @@ const compareWords = compareWith => compose(
  */
 export default (firebase, config) => async object => {
   const { name, bucket } = object
-
+  console.log(object)
   const storage = firebase.storage().bucket(bucket)
 
   const database = databaseWrapper(firebase)
-  console.log(object)
   try {
     /**
      * BEFORE EVERYTHING STARTS

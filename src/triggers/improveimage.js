@@ -58,12 +58,6 @@ export default (firebase, config) => async object => {
       dir: dirname(tempPath)
     }))
 
-    /**
-     * @description temp path for converted image
-     * @type {string}
-     */
-    const tempConvertedPath = join(tmpdir(), uploadPath)
-
     await mkdirp(dirname(tempPath))
     await mkdirp(join(tmpdir(), uploadPath))
 
@@ -77,7 +71,6 @@ export default (firebase, config) => async object => {
 
     await storage.file(name).delete()
 
-    unlinkSync(tempConvertedPath)
     unlinkSync(tempPath)
 
     return null
