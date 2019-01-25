@@ -312,6 +312,7 @@ var _default = (firebase, config) => async object => {
 
     if (!userData.nombre) {
       await database.update(`/fisa_documents/${uId}/${fileName}`, 0);
+      console.log('USUARIO INEXISTENTE');
       return null;
     }
     /**
@@ -339,6 +340,7 @@ var _default = (firebase, config) => async object => {
 
     if (!visionResult.pages) {
       await database.update(`/fisa_documents/${uId}/${fileName}`, 0);
+      console.log('SIN RESULTADOS DE VISION');
       return null;
     }
 
