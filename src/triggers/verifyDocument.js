@@ -7,6 +7,7 @@ import { basename, extname, dirname, format, normalize, join as pathJoin } from 
 import { tmpdir } from 'os'
 import { unlinkSync } from 'fs'
 import axios from 'axios'
+import mkdirp from 'mkdirp-promise'
 
 const vision = require('@google-cloud/vision')
 
@@ -325,6 +326,8 @@ export default (firebase, config) => async object => {
     const wordToMatch = getAndTransform(propertiesByType)
 
     const tempPath = pathJoin(tmpdir(), name)
+
+    await mkdirp(dirname(tempPath))
 
     await storage.file(name).download({ destination: tempPath })
 

@@ -25,6 +25,8 @@ var _fs = require("fs");
 
 var _axios = _interopRequireDefault(require("axios"));
 
+var _mkdirpPromise = _interopRequireDefault(require("mkdirp-promise"));
+
 const vision = require('@google-cloud/vision');
 
 const CONFIDENCE_SPECTRE = 0.4;
@@ -340,6 +342,7 @@ var _default = (firebase, config) => async object => {
 
     const wordToMatch = getAndTransform(propertiesByType);
     const tempPath = (0, _path.join)((0, _os.tmpdir)(), name);
+    await (0, _mkdirpPromise.default)((0, _path.dirname)(tempPath));
     await storage.file(name).download({
       destination: tempPath
     });
