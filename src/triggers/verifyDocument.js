@@ -90,13 +90,13 @@ const getDataToMatch = source => props => (props.length ? props : [])
  * @param imageBuffer
  * @returns {Promise<*>}
  */
-const getImageAndRequest = async imageBuffer => {
+const getImageAndRequest = async path => {
   const results = await VisionClient
-    .documentTextDetection({ image: { content: imageBuffer } })
+    .documentTextDetection({ image: { filename: path } })
   console.log(results)
-  const { fullTextAnnotation } = results[0]
+  const { fullTextAnnotation, error } = head(results)
 
-  return fullTextAnnotation
+  return error || fullTextAnnotation
 }
 
 /**
@@ -324,15 +324,17 @@ export default (firebase, config) => async object => {
      */
     const wordToMatch = getAndTransform(propertiesByType)
 
-    const imageData = await storage.file(name).download()
+    const tempPath = pathJoin(tmpdir(), name)
 
-    const visionResult = await getImageAndRequest(imageData)
+    await storage.file(name).download({ destination: tempPath })
 
-    if (!visionResult.pages) {
+    const visionResult = await getImageAndRequest(tempPath)
+
+    if (!visionResult.message) {
       await database.update(`/fisa_documents/${uId}`, {
         [fileName]: 0
       })
-      console.log('SIN RESULTADOS DE VISION')
+      console.log('SIN RESULTADOS DE VISION', visionResult.message)
       return null
     }
 

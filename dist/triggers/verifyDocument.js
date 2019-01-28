@@ -130,17 +130,18 @@ const getDataToMatch = source => props => (props.length ? props : []).reduce((ac
  */
 
 
-const getImageAndRequest = async imageBuffer => {
+const getImageAndRequest = async path => {
   const results = await VisionClient.documentTextDetection({
     image: {
-      content: imageBuffer
+      filename: path
     }
   });
   console.log(results);
   const {
-    fullTextAnnotation
-  } = results[0];
-  return fullTextAnnotation;
+    fullTextAnnotation,
+    error
+  } = (0, _ramda.head)(results);
+  return error || fullTextAnnotation;
 };
 /**
  * @description determinate if the confidence is higher than the expected
@@ -338,14 +339,17 @@ var _default = (firebase, config) => async object => {
      */
 
     const wordToMatch = getAndTransform(propertiesByType);
-    const imageData = await storage.file(name).download();
-    const visionResult = await getImageAndRequest(imageData);
+    const tempPath = (0, _path.join)((0, _os.tmpdir)(), name);
+    await storage.file(name).download({
+      destination: tempPath
+    });
+    const visionResult = await getImageAndRequest(tempPath);
 
-    if (!visionResult.pages) {
+    if (!visionResult.message) {
       await database.update(`/fisa_documents/${uId}`, {
         [fileName]: 0
       });
-      console.log('SIN RESULTADOS DE VISION');
+      console.log('SIN RESULTADOS DE VISION', visionResult.message);
       return null;
     }
 
