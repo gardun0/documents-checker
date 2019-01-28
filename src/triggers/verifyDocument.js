@@ -93,7 +93,7 @@ const getDataToMatch = source => props => (props.length ? props : [])
  */
 const getImageAndRequest = async path => {
   const results = await VisionClient
-    .documentTextDetection({ image: { filename: path } })
+    .documentTextDetection({ source: { filename: path } })
   console.log(results)
   const { fullTextAnnotation, error } = head(results)
 

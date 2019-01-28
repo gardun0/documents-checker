@@ -134,7 +134,7 @@ const getDataToMatch = source => props => (props.length ? props : []).reduce((ac
 
 const getImageAndRequest = async path => {
   const results = await VisionClient.documentTextDetection({
-    image: {
+    source: {
       filename: path
     }
   });
