@@ -344,7 +344,7 @@ var _default = (firebase, config) => async object => {
     });
     const visionResult = await getImageAndRequest(tempPath);
 
-    if (!visionResult.message) {
+    if (visionResult.message) {
       await database.update(`/fisa_documents/${uId}`, {
         [fileName]: 0
       });
