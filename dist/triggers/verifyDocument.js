@@ -133,11 +133,7 @@ const getDataToMatch = source => props => (props.length ? props : []).reduce((ac
 
 
 const getImageAndRequest = async path => {
-  const results = await VisionClient.documentTextDetection({
-    source: {
-      filename: path
-    }
-  });
+  const results = await VisionClient.documentTextDetection(path);
   console.log(results);
   const {
     fullTextAnnotation,
