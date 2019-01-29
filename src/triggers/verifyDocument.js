@@ -333,11 +333,11 @@ export default (firebase, config) => async object => {
 
     const visionResult = await getImageAndRequest(tempPath)
 
-    if (visionResult.message) {
+    if (!visionResult || (visionResult && visionResult.message)) {
       await database.update(`/fisa_documents/${uId}`, {
         [fileName]: 0
       })
-      console.log('SIN RESULTADOS DE VISION', visionResult.message)
+      console.log('SIN RESULTADOS DE VISION', (visionResult || { message: 'No se encontro nada' }).message)
       return null
     }
 
@@ -360,7 +360,9 @@ export default (firebase, config) => async object => {
       getWords
     )
 
-    await database.update(`/fisa_documents/${uId}/${fileName}`, getResult(blocks))
+    await database.update(`/fisa_documents/${uId}`, {
+      [fileName]: getResult(blocks)
+    })
     return null
   } catch (err) {
     console.error(err)
