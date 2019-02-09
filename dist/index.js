@@ -16,7 +16,6 @@ var _default = (firebase, config = {}) => {
      * @description Storage function that improves images for better Vision results
      * @type {Function}
      */
-    ImproveImage: (0, _triggers.improveImage)(firebase, config),
     VerifyDocument: (0, _triggers.verify)(firebase, config)
   };
 };

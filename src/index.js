@@ -1,7 +1,7 @@
 /**
  * @description source generator of the triggers
  */
-import { improveImage, verify } from '@triggers'
+import { verify } from '@triggers'
 
 export default (firebase, config = {}) => {
   return {
@@ -9,8 +9,6 @@ export default (firebase, config = {}) => {
      * @description Storage function that improves images for better Vision results
      * @type {Function}
      */
-    ImproveImage: improveImage(firebase, config),
-
     VerifyDocument: verify(firebase, config)
   }
 }
