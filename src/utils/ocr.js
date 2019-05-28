@@ -225,8 +225,7 @@ export default async (filePath, type, config, toMatch) => {
   if (!dataToMatch) return 0
 
   if (!toMatch.nombre) {
-    console.log('USUARIO INEXISTENTE')
-    return 0
+    throw new Error('USUARIO INEXISTENTE')
   }
 
   /**
@@ -244,8 +243,7 @@ export default async (filePath, type, config, toMatch) => {
   const visionResult = await getImageAndRequest(filePath)
 
   if (!visionResult || (visionResult && visionResult.message)) {
-    console.log('SIN RESULTADOS DE VISION', (visionResult || { message: 'No se encontro nada' }).message)
-    return 0
+    throw new Error('SIN RESULTADOS DE VISION', (visionResult || { message: 'No se encontro nada' }).message)
   }
 
   const { pages: [ result ] } = visionResult
@@ -266,6 +264,6 @@ export default async (filePath, type, config, toMatch) => {
     compareWords(wordToMatch),
     getWords
   )
-  console.log('RESULT', getResult(blocks))
+
   return getResult(blocks)
 }

@@ -85,13 +85,22 @@ var _default = (firebase, config) => async object => {
     const userData = await database.fetch(`${config.dataPath}/${id}`);
     console.log('USER', userData);
     const result = await (0, _ocr.default)(convertedTempPath, type, config, userData);
+    console.log('RESULT', result);
     await database.update(`${config.resultPath}/${id}`, {
       [type]: result
     });
     (0, _fs.unlinkSync)(tempPath);
     return null;
   } catch (err) {
+    const fileName = (0, _path.basename)(name, (0, _path.extname)(name));
+    const {
+      id,
+      type
+    } = (0, _helpers.getDocumentDataFromName)(fileName);
     console.error(err);
+    await database.update(`${config.resultPath}/${id}`, {
+      [type]: 0
+    });
   }
 };
 
