@@ -1,6 +1,6 @@
-import getMatcher from '@utils/matchers'
+import getMatcher from 'utils/matchers'
 import { toUpper, compose, prop, map, join, reduce, split, keys, curry, divide, __, head } from 'ramda'
-import { optionalProperty } from '@utils/helpers'
+import { optionalProperty } from 'utils/helpers'
 import { compareTwoStrings } from 'string-similarity'
 
 const vision = require('@google-cloud/vision')

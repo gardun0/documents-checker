@@ -5,10 +5,10 @@ import { unlinkSync } from 'fs'
 import { spawn } from 'child-process-promise'
 import mkdirp from 'mkdirp-promise'
 import { head } from 'ramda'
-import { getDocumentDataFromName } from '@utils/helpers'
+import { getDocumentDataFromName } from 'utils/helpers'
 
-import databaseWrapper from '@utils/firebase'
-import getOCRResult from '@utils/ocr'
+import databaseWrapper from 'utils/firebase'
+import getOCRResult from 'utils/ocr'
 
 export default (firebase, config) => async object => {
   const { name, bucket, contentType } = object

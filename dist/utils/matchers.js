@@ -9,9 +9,9 @@ exports.default = void 0;
 
 var _ramda = require("ramda");
 
-var _verifyDocument = _interopRequireDefault(require("../triggers/verifyDocument.legacy"));
+var _moment = _interopRequireDefault(require("moment"));
 
-const getDateFromMS = ms => (0, _verifyDocument.default)(new Date(ms * 1)).format('DD/MM/YYYY');
+const getDateFromMS = ms => (0, _moment.default)(new Date(ms * 1)).format('DD/MM/YYYY');
 
 const toMatch = {
   CD: [{

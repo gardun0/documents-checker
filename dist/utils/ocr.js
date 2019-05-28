@@ -239,6 +239,7 @@ var _default = async (filePath, type, config, toMatch) => {
       detectedLanguages: []
     }, 'property')
   };
+  console.log('BLOCKS', blocks);
   /**
    * @description filter, order and compare all the words found from Vision API and get a confidence percentage
    * @type {Function}
@@ -246,6 +247,7 @@ var _default = async (filePath, type, config, toMatch) => {
    */
 
   const getResult = (0, _ramda.compose)(compareWords(wordToMatch), getWords);
+  console.log('RESULT', getResult(blocks));
   return getResult(blocks);
 };
 

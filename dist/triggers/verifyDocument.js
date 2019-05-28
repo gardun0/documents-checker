@@ -41,6 +41,7 @@ var _default = (firebase, config) => async object => {
      * @type {Storage.Bucket}
      */
     const storage = firebase.storage().bucket(bucket);
+    console.log('NAME', name);
     /**
      * @description path from file
      * @type {string}
@@ -78,13 +79,11 @@ var _default = (firebase, config) => async object => {
     await storage.file(name).download({
       destination: tempPath
     });
-    await (0, _childProcessPromise.spawn)('convert', [tempPath, '-density', '300', convertedTempPath], {
-      capture: ['stdout', 'stderr']
-    });
-    await (0, _childProcessPromise.spawn)('convert', [convertedTempPath, '-type', 'Grayscale', '-depth', '8', '-level', '45%x55', convertedTempPath], {
+    await (0, _childProcessPromise.spawn)('convert', [tempPath, '-density', '300', '-type', 'Grayscale', '-depth', '8', '-level', '45%x55', convertedTempPath], {
       capture: ['stdout', 'stderr']
     });
     const userData = await database.fetch(`${config.dataPath}/${id}`);
+    console.log('USER', userData);
     const result = await (0, _ocr.default)(convertedTempPath, type, config, userData);
     await database.update(`${config.resultPath}/${id}`, {
       [type]: result

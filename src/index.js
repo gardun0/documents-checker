@@ -1,7 +1,7 @@
 /**
  * @description source generator of the triggers
  */
-import { verify } from '@triggers'
+import { verify } from 'triggers'
 
 export default (firebase, config = {}) => {
   return {
