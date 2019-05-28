@@ -21,7 +21,7 @@ export default (firebase, config) => async object => {
      * @type {Storage.Bucket}
      */
     const storage = firebase.storage().bucket(bucket)
-
+    console.log('NAME', name)
     /**
      * @description path from file
      * @type {string}
@@ -58,12 +58,10 @@ export default (firebase, config) => async object => {
 
     await storage.file(name).download({ destination: tempPath })
 
-    await spawn('convert', [tempPath, '-density', '300', convertedTempPath], { capture: ['stdout', 'stderr'] })
-
-    await spawn('convert', [convertedTempPath, '-type', 'Grayscale', '-depth', '8', '-level', '45%x55', convertedTempPath], { capture: ['stdout', 'stderr'] })
+    await spawn('convert', [tempPath, '-density', '300', '-type', 'Grayscale', '-depth', '8', '-level', '45%x55', convertedTempPath], { capture: ['stdout', 'stderr'] })
 
     const userData = await database.fetch(`${config.dataPath}/${id}`)
-
+    console.log('USER', userData)
     const result = await getOCRResult(convertedTempPath, type, config, userData)
 
     await database.update(`${config.resultPath}/${id}`, {

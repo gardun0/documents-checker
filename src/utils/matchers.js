@@ -1,5 +1,6 @@
 import { toUpper } from 'ramda'
-import moment from '../triggers/verifyDocument.legacy'
+import moment from 'moment'
+
 const getDateFromMS = ms => moment(new Date(ms * 1)).format('DD/MM/YYYY')
 
 const toMatch = {

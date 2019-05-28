@@ -256,7 +256,7 @@ export default async (filePath, type, config, toMatch) => {
       ? null
       : { detectedLanguages: [] }, 'property')
   }
-
+  console.log('BLOCKS', blocks)
   /**
    * @description filter, order and compare all the words found from Vision API and get a confidence percentage
    * @type {Function}
@@ -266,6 +266,6 @@ export default async (filePath, type, config, toMatch) => {
     compareWords(wordToMatch),
     getWords
   )
-
+  console.log('RESULT', getResult(blocks))
   return getResult(blocks)
 }
